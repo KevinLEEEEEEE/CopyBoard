@@ -6,7 +6,8 @@
   "scripts": {
     "start": "webpack-dev-server --open",
     "dev": "webpack --mode development",
-    "build": "webpack --mode production"
+    "build": "webpack --mode production",
+    "lint": "tslint src/ts/*.ts -t verbose"
   },
   "repository": {
     "type": "git",
