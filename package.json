@@ -7,7 +7,9 @@
     "start": "webpack-dev-server --open",
     "dev": "webpack --mode development",
     "build": "webpack --mode production",
-    "lint": "tslint src/ts/*.ts -t verbose"
+    "lint": "tslint src/ts/*.ts -t verbose",
+    "fix": "tslint --fix src/ts/*.ts -t verbose",
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -20,14 +22,18 @@
   },
   "homepage": "https://github.com/KevinLEEEEEEE/Graphic#readme",
   "devDependencies": {
+    "chai": "^4.2.0",
     "clean-webpack-plugin": "^0.1.19",
     "css-loader": "^1.0.0",
     "csv-loader": "^3.0.2",
+    "expect.js": "^0.3.1",
     "file-loader": "^2.0.0",
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^3.2.0",
+    "mocha": "^5.2.0",
     "style-loader": "^0.23.1",
     "ts-loader": "^5.2.1",
+    "ts-node": "^7.0.1",
     "typescript": "^3.1.3",
     "webpack": "^4.20.2",
     "webpack-cli": "^3.1.2",

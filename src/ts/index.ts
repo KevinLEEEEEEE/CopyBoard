@@ -1,9 +1,7 @@
 import "../css/main.css";
 
-function greeter(person) {
-  return "Hellooo, " + person;
+export default class Calculator {
+  public Add(a: number, b: number): number {
+    return a + b;
+  }
 }
-
-const user = "Jane User";
-
-document.body.innerHTML += greeter(user);

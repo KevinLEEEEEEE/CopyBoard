@@ -1,0 +1,2 @@
+--recursive
+--require ts-node/register ./test/*.spec.ts
