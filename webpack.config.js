@@ -18,13 +18,14 @@ module.exports = {
     new HtmlWebpackPlugin({
       hash: true,
       title: 'pixel online',
-      template: './src/html/index.html',
+      favicon: './favicon.ico',
+      template: './index.html',
       filename: './index.html',
     }),
     new webpack.HotModuleReplacementPlugin(),
   ],
   output: {
-    filename: '[name].bundle.js',
+    filename: 'assets/js/[name].bundle.js',
     path: path.resolve(__dirname, 'dist'),
   },
   module: {
@@ -49,14 +50,21 @@ module.exports = {
       },
       {
         test: /\.(png|svg|jpg|gif)$/,
-        use: [
-          'file-loader'
-        ]
+        use: [{
+          loader: 'file-loader',
+          options: {
+            name: 'assets/img/[name]-[hash:6].[ext]'
+          }
+        }]
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/,
-        use: [
-          'file-loader'
+        use: [{
+          loader: 'file-loader',
+          options: {
+            name: 'assets/fonts/[name]-[hash:6].[ext]'
+          }
+        }
         ]
       },
       {
@@ -70,7 +78,7 @@ module.exports = {
         use: [
           'xml-loader'
         ]
-      }
+      },
     ]
   },
   resolve: {

@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/KevinLEEEEEEE/Graphic#readme",
   "devDependencies": {
+    "@types/mocha": "^5.2.5",
     "chai": "^4.2.0",
     "clean-webpack-plugin": "^0.1.19",
     "css-loader": "^1.0.0",
