@@ -38,50 +38,50 @@ module.exports = {
       {
         test: /\.html$/,
         use: {
-            loader: 'html-loader'
-        }
+            loader: 'html-loader',
+        },
       },
       {
         test: /\.css$/,
         use: [
           'style-loader',
-          'css-loader'
-        ]
+          'css-loader',
+        ],
       },
       {
         test: /\.(png|svg|jpg|gif)$/,
         use: [{
           loader: 'file-loader',
           options: {
-            name: 'assets/img/[name]-[hash:6].[ext]'
-          }
-        }]
+            name: 'assets/img/[name]-[hash:6].[ext]',
+          },
+        }],
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/,
         use: [{
           loader: 'file-loader',
           options: {
-            name: 'assets/fonts/[name]-[hash:6].[ext]'
-          }
-        }
-        ]
+            name: 'assets/fonts/[name]-[hash:6].[ext]',
+          },
+        },
+        ],
       },
       {
         test: /\.(csv|tsv)$/,
         use: [
-          'csv-loader'
-        ]
+          'csv-loader',
+        ],
       },
       {
         test: /\.xml$/,
         use: [
-          'xml-loader'
-        ]
+          'xml-loader',
+        ],
       },
     ]
   },
   resolve: {
-    extensions: [".tsx", ".ts", ".js"]
-  }
+    extensions: [".tsx", ".ts", ".js"],
+  },
 };
