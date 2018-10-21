@@ -1,0 +1,71 @@
+.colorDial {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 400px;
+  width: 100px;
+  height: 100px;
+  border-radius: 15px 50px 50px 50px;
+  background-color: rgb(60, 60, 60);
+}
+
+.colorDial::before {
+  content: '';
+  position: absolute;
+  top: 7px;
+  left: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 3.5px;
+  background-color: rgb(150, 150, 150);
+}
+
+.colorDial>div {
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  width: 90px;
+  height: 90px;
+  border-radius: 45px;
+  overflow: hidden;
+}
+
+.colorDial>div::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  border-radius: 45px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, .3) inset;
+  pointer-events: none;
+}
+
+.colorContainer {
+  position: relative;
+  width: 45px;
+  height: 90px;
+  overflow: hidden;
+}
+
+.colorContainer input {
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  width: 200%;
+  height: 200%;
+  padding: 0;
+  border: transparent;
+  outline: none;
+  background-color: transparent;
+}
+
+#leftColor {
+}
+
+#rightColor {
+
+}

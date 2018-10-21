@@ -1,0 +1,51 @@
+.board {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+}
+
+.boardController {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.controlPanel {
+  display: flex;
+  flex-direction: row;
+}
+
+.controlPanel>div {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.controlPanel button {
+  width: 35px;
+  height: 35px;
+  padding: 0;
+  border: transparent;
+  background-color: transparent;
+  font-size: .6rem;
+  color: white;
+}
+
+.controlPanel>div button:not(:first-child) {
+  visibility: hidden;
+}
+
+.rightPanel>div:hover button {
+  visibility: visible;
+}
+
+.rightPanel>div:hover {
+  border-radius: 35px;
+  background-color: rgba(0, 0, 0, .5);
+}
+
+/* img {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+} */

@@ -7,7 +7,53 @@
     <title>pixel online</title>
   </head>
   <body>
-    <h1>hello</h1>
-    <img src="./src//image//fourier.jpg" alt="">
+    <div class="board referenceBoard">
+      <div class="boardController">
+        <div class="controlPanel leftPanel">
+          <div>
+            <input type="text" placeholder="name">
+          </div>
+          <div>
+            <button class="opacity">opacity</button>
+          </div>
+        </div>
+        <div class="controlPanel rightPanel">
+          <div>
+            <button class="moveUp">up</button>
+            <button class="moveTop">top</button>
+          </div>
+          <div>
+            <button class="moveDown">down</button>
+            <button class="moveBottom">bottom</button>
+          </div>
+          <div>
+            <button class="colorSelector">color</button>
+            <button class="colorSelector">bin</button>
+          </div>
+          <div>
+            <button class="locker">locker</button>
+            <button class="delete">delete</button>
+          </div>
+        </div>
+      </div>
+      <div class="boardContent">
+        <div class="contentWrapper">
+          <img src="./src//image//fourier.jpg" alt="testImage" width="500px">
+        </div>
+      </div>
+    </div>
+
+    <div class="board drawBoard"></div>
+
+    <div class="colorDial">
+      <div>
+        <div class="colorContainer">
+          <input type="color" id="leftColor">
+        </div>
+        <div class="colorContainer">
+          <input type="color" id="rightColor">
+        </div>
+      </div>
+    </div>
   </body>
 </html>
