@@ -1,7 +1,7 @@
 .board {
   position: absolute;
-  left: 10px;
-  top: 10px;
+  left: 100px;
+  top: 500px;
 }
 
 .boardController {
@@ -43,9 +43,6 @@
   background-color: rgba(0, 0, 0, .5);
 }
 
-/* img {
-  -moz-user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-} */
+.nonePointerEvents {
+  /* pointer-events: none; */
+}

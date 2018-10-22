@@ -1,55 +1,68 @@
 
 export default class Board {
+  private canvas: HTMLCanvasElement;
+  private ctx: CanvasRenderingContext2D;
   private name: string;
-  private width: number;
-  private height: number;
-  private opacity: number;
-  private locked: boolean;
+  private opacity: number = 1;
+  private locked: boolean = false;
 
-  constructor() {
+  constructor(name: string) {
+    this.name = name;
+
+    this.canvas = document.createElement("canvas");
+
+    this.ctx = this.canvas.getContext("2d");
   }
 
-  getName(): string {
+  public getCanvas(): HTMLCanvasElement {
+    return this.canvas;
+  }
+
+  public getName(): string {
     return this.name;
   }
 
-  setName(name: string): void {
+  public setName(name: string): void {
     this.name = name;
   }
 
-  getWidth(): number {
-    return this.width;
+  public getWidth(): number {
+    return this.canvas.width;
   }
 
-  setWidth(width: number) {
-    this.width = width;
+  public setWidth(width: number) {
+    this.canvas.width = width;
   }
 
-  getHeight(): number {
-    return this.height;
+  public getHeight(): number {
+    return this.canvas.height;
   }
 
-  setHeight(height: number) {
-    this.height = height;
+  public setHeight(height: number) {
+    this.canvas.height = height;
   }
 
-  getOpacity(): number {
+  public getOpacity(): number {
     return this.opacity;
   }
 
-  setOpacity(opacity: number) {
+  public setOpacity(opacity: number) {
     this.opacity = opacity;
   }
 
-  lock() {
+  public lock(): void {
     this.locked = true;
   }
 
-  unlock() {
+  public unlock(): void {
     this.locked = false;
   }
 
-  islocked(): boolean {
+  public islocked(): boolean {
     return this.locked;
+  }
+
+  public drawImage(image: HTMLImageElement, x: number, y: number, width: number, height: number): void {
+    this.ctx.drawImage(image, x, y, width, height);
   }
 }

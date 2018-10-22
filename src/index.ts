@@ -1,9 +1,9 @@
-import './css/main.css';
 import "./css/board.css";
-import './css/color.css';
+import "./css/color.css";
+import "./css/main.css";
 
-import Test from "./ts/test";
+import Main from "./ts/main";
 
-const test = new Test();
+const main = new Main();
 
-test.Test();
+main.init();

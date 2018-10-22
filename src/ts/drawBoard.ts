@@ -1,41 +1,41 @@
-import Board from './board';
+// import Board from "./board";
 
-interface painter {
-  getColor();
+// interface painter {
+//   getColor();
 
-  setColor();
+//   setColor();
 
-  draw();
+//   draw();
 
-  erase();
+//   erase();
 
-  fill();
-}
+//   fill();
+// }
 
-export default class DrawBoard extends Board implements painter {
-  private color: Array<number>;
+// export default class DrawBoard extends Board implements painter {
+//   private color: number[];
 
-  constructor() {
-    super()
-  }
+//   constructor() {
+//     super();
+//   }
 
-  getColor(): Array<number> {
-    return this.color;
-  }
+//   public getColor(): number[] {
+//     return this.color;
+//   }
 
-  setColor() {
+//   public setColor() {
 
-  }
+//   }
 
-  draw() {
+//   public draw() {
 
-  }
+//   }
 
-  erase() {
+//   public erase() {
 
-  }
+//   }
 
-  fill() {
-    
-  }
-}
+//   public fill() {
+
+//   }
+// }
