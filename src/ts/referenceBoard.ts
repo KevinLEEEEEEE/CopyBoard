@@ -109,6 +109,8 @@ export default class ReferenceBoard extends Board {
     this.clickPos = [offsetX, offsetY];
 
     this.canMove = true;
+
+    this.reference.referenceBoard.classList.add("tmpTopLayer");
   }
 
   private mousemove(e): void {
@@ -126,6 +128,8 @@ export default class ReferenceBoard extends Board {
 
   private mouseup(): void {
     this.canMove = false;
+
+    this.reference.referenceBoard.classList.remove("tmpTopLayer");
   }
 
   private preventAll(e): void {

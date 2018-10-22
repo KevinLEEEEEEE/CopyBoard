@@ -43,6 +43,10 @@
   background-color: rgba(0, 0, 0, .5);
 }
 
-.nonePointerEvents {
-  /* pointer-events: none; */
+.tmpTopLayer {
+  z-index: 1000;
+}
+
+.tmpTopLayer .boardContent {
+  opacity: .9;
 }
