@@ -4,14 +4,14 @@ import ReferenceBoard from './referenceBoard';
 
 export default class Main {
   public init() {
-    const colorDialDom: HTMLElement = document.body;
-    const mainDom: HTMLElement = document.getElementById("main");
+    const colorDialParentNode: HTMLElement = document.getElementById("colorDialEventsLayer");
+    const fileInputDetectNode: HTMLElement = document.getElementById("main");
 
-    const colorDial = new ColorDial(colorDialDom);
+    const colorDial = new ColorDial(colorDialParentNode);
 
     colorDial.init();
 
-    const fileInput1 = new FileInput(mainDom);
+    const fileInput1 = new FileInput(fileInputDetectNode);
 
     fileInput1.init();
 

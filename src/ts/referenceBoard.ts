@@ -40,13 +40,15 @@ export default class ReferenceBoard extends Board {
   }
 
   public init(): void {
-    this.initImageDisplay();
-
     this.attachMoveEvents();
 
     this.attachLayerBtnEvents();
 
     this.attachScrollEvents();
+
+    this.attachSettingBtnEvents();
+
+    this.initImageDisplay();
   }
 
   public delete(): void {
@@ -56,7 +58,9 @@ export default class ReferenceBoard extends Board {
 
     this.removeLayerBtnEvents();
 
-    this.parentNode.removeChild(this.reference.referenceBoard);
+    this.removeSettingBtnEvents();
+
+    this.removeFromParent();
   }
 
   private initImageDisplay(): void {
@@ -71,34 +75,40 @@ export default class ReferenceBoard extends Board {
 
       this.drawImage(img, 0, 0, width, height);
 
-      this.parentNode.appendChild(this.reference.referenceBoard);
+      this.appendIntoParent();
     };
 
     img.src = this.base64;
   }
 
+  private appendIntoParent(): void {
+    this.parentNode.appendChild(this.reference.referenceBoard);
+  }
+
+  private removeFromParent(): void {
+    this.parentNode.removeChild(this.reference.referenceBoard);
+  }
+
   private attachMoveEvents(): void {
-    this.refCanvas.addEventListener("mousedown", this.mousedown);
+    this.refCanvas.addEventListener("mousedown", this.mousedown, true);
 
-    this.refCanvas.addEventListener("mousemove", this.mousemove);
+    this.refCanvas.addEventListener("mousemove", this.mousemove, true);
 
-    this.refCanvas.addEventListener("mouseup", this.mouseup);
+    this.refCanvas.addEventListener("mouseup", this.mouseup, true);
 
-    this.refCanvas.addEventListener("mouseleave", this.mouseup);
+    this.refCanvas.addEventListener("mouseleave", this.mouseup, true);
   }
 
   private removeMoveEvents(): void {
-    this.refCanvas.removeEventListener("mousedown", this.mousedown);
+    this.refCanvas.removeEventListener("mousedown", this.mousedown, true);
 
-    this.refCanvas.removeEventListener("mousemove", this.mousemove);
+    this.refCanvas.removeEventListener("mousemove", this.mousemove, true);
 
-    this.refCanvas.removeEventListener("mouseup", this.mouseup);
+    this.refCanvas.removeEventListener("mouseup", this.mouseup, true);
   }
 
   private mousedown(e): void {
     const { target } = e;
-
-    this.preventAll(e);
 
     if (!target.isSameNode(this.refCanvas)) {
       return;
@@ -110,56 +120,53 @@ export default class ReferenceBoard extends Board {
 
     this.canMove = true;
 
-    this.reference.referenceBoard.classList.add("tmpTopLayer");
+    this.moveToTopLevel(this.reference.referenceBoard)
   }
 
   private mousemove(e): void {
-    this.preventAll(e);
-
     if (this.canMove !== true) {
       return;
     }
 
     const { pageX, pageY } = e;
-    const [x, y]: number[] = this.getRightPos(pageX - this.clickPos[0], pageY - this.clickPos[1] - 70);
+    const { clientWidth, clientHeight } = this.parentNode;
 
-    this.updatePosition(x, y); // improvement required
+    // small size, with border, large size, no border
+
+    const x: number = this.getRightPosition(pageX, this.clickPos[0], this.getWidth(), clientWidth);
+    const y: number = this.getRightPosition(pageY, this.clickPos[1] + 70, this.getHeight() + 70, clientHeight);
+
+    this.updateNodePosition(this.reference.referenceBoard, x, y);
   }
 
   private mouseup(): void {
     this.canMove = false;
 
-    this.reference.referenceBoard.classList.remove("tmpTopLayer");
+    this.moveBackFromTopLevel(this.reference.referenceBoard);
   }
 
-  private preventAll(e): void {
-    e.preventDefault();
-    e.stopPropagation();
+  private moveToTopLevel(node: HTMLElement): void {
+    node.classList.add("tmpTopLayer");
   }
 
-  private getRightPos(x: number, y: number): number[] {
-    const { clientWidth: cw, clientHeight: ch} = this.reference.referenceBoard;
-    const { clientWidth: pw, clientHeight: ph} = this.parentNode;
+  private moveBackFromTopLevel(node: HTMLElement): void {
+    node.classList.remove("tmpTopLayer");
+  }
 
-    if (x < 0) {
-      x = 0;
-    } else if (x + cw > pw) {
-      x = pw - cw;
+  private getRightPosition(toClientDis: number, toNodeDis: number, length: number, conteinerLength): number {
+    if (toClientDis - toNodeDis < 0) {
+      return 0;
+    } else if (toClientDis - toNodeDis + length > conteinerLength) {
+      return conteinerLength - length;
+    } else {
+      return toClientDis - toNodeDis;
     }
-
-    if (y < 0) {
-      y = 0
-    } else if (y + ch > ph) {
-      y = ph - ch;
-    }
-
-    return [x, y];
   }
-
-  private updatePosition(x: number, y: number): void {
+ 
+  private updateNodePosition(node: HTMLElement, x: number, y: number): void {
     window.requestAnimationFrame(() => {
-      this.reference.referenceBoard.style.left = x + "px";
-      this.reference.referenceBoard.style.top = y + "px";
+      node.style.left = x + "px";
+      node.style.top = y + "px";
     });
   }
 
@@ -237,5 +244,7 @@ export default class ReferenceBoard extends Board {
     
   }
 }
+
+// delete. lock, styleSize, scroll, border
 
 

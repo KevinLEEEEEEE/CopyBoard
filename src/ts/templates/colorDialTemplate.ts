@@ -1,24 +1,10 @@
+import createAndAppend from '../utils/createAndAppend';
+
 interface IColorDialTemplate {
   colorDial: HTMLDivElement;
   colorInputL: HTMLInputElement;
   colorInputR: HTMLInputElement;
 }
-
-const createAndAppend = <T>(parent: HTMLElement, nodeType: string = "div", ...klass: string[]): T => {
-  const node: any = document.createElement(nodeType);
-
-  if (klass !== null) {
-    klass.forEach((klas) => {
-      node.classList.add(klas);
-    });
-  }
-
-  if (parent !== null) {
-    parent.appendChild(node);
-  }
-
-  return node;
-};
 
 const colorDialTemplate = (): IColorDialTemplate => {
   const colorDial: HTMLDivElement = createAndAppend<HTMLDivElement>(null, "div", "colorDial");
@@ -38,7 +24,6 @@ const colorDialTemplate = (): IColorDialTemplate => {
 };
 
 export {
-  createAndAppend,
   colorDialTemplate,
   IColorDialTemplate,
 };

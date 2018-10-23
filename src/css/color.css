@@ -1,14 +1,23 @@
+#colorDialEventsLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+}
+
 .colorDial {
   display: flex;
   justify-content: center;
   align-items: center;
   position: absolute;
-  top: 400px;
+  top: 30px;
+  left: 30px;
   width: 100px;
   height: 100px;
-  z-index: 10001;
   border-radius: 15px 50px 50px 50px;
   background-color: rgb(60, 60, 60);
+  pointer-events: initial;
 }
 
 .colorDial::before {

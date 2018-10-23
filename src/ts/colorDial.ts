@@ -1,10 +1,12 @@
 import { colorDialTemplate, IColorDialTemplate } from "./templates/colorDialTemplate";
 import ColorConversion from "./utils/colorConversion";
 
+const COLORDIAL_NODE_WIDTH = 100;
+const COLORDIAL_NODE_HEIGHT = 100;
+
 export default class ColorDial {
   private readonly parentNode: HTMLElement;
-  private readonly dial: IColorDialTemplate;
-  private readonly body: HTMLElement;
+  private readonly dialComponents: IColorDialTemplate;
   private readonly colorConversion: ColorConversion;
   private currentColor: string = "#000000";
   private clickPos: number[] = [0, 0];
@@ -13,9 +15,7 @@ export default class ColorDial {
   constructor(parentNode: HTMLElement) {
     this.parentNode = parentNode;
 
-    this.body = document.getElementById("main");
-
-    this.dial = colorDialTemplate();
+    this.dialComponents = colorDialTemplate();
 
     this.colorConversion = new ColorConversion();
 
@@ -24,6 +24,8 @@ export default class ColorDial {
     this.mousemove = this.mousemove.bind(this);
 
     this.mouseup = this.mouseup.bind(this);
+
+    this.colorInputChange = this.colorInputChange.bind(this);
   }
 
   public init(): void {
@@ -31,9 +33,7 @@ export default class ColorDial {
 
     this.attachInputEvents();
 
-    const { firstChild } = this.parentNode;
-
-    this.parentNode.insertBefore(this.dial.colorDial, firstChild);
+    this.appendIntoParent();
   }
 
   public delete(): void {
@@ -41,7 +41,7 @@ export default class ColorDial {
 
     this.removeInputEvents();
 
-    this.parentNode.removeChild(this.dial.colorDial);
+    this.removeFromParent();
   }
 
   public getColor(): number[] {
@@ -57,49 +57,57 @@ export default class ColorDial {
   public setHexColor(hex: string): void {
     this.currentColor = hex;
 
-    this.updateDisplay();
+    this.updateInputDisplay();
+  }
+
+  private appendIntoParent(): void {
+    this.parentNode.appendChild(this.dialComponents.colorDial);
+  }
+
+  private removeFromParent(): void {
+    this.parentNode.removeChild(this.dialComponents.colorDial);
   }
 
   private attachMoveEvents(): void {
-    const colorDial: HTMLElement = this.dial.colorDial;
+    const colorDial: HTMLElement = this.dialComponents.colorDial;
 
-    colorDial.addEventListener("mousedown", this.mousedown);
+    colorDial.addEventListener("mousedown", this.mousedown, true);
 
-    colorDial.addEventListener("mousemove", this.mousemove);
+    colorDial.addEventListener("mousemove", this.mousemove, true);
 
-    colorDial.addEventListener("mouseup", this.mouseup);
+    colorDial.addEventListener("mouseup", this.mouseup, true);
 
-    colorDial.addEventListener("dragover", this.preventAll);
+    colorDial.addEventListener("dragover", this.preventAndStop, true);
 
-    colorDial.addEventListener("drop", this.preventAll);
+    colorDial.addEventListener("drop", this.preventAndStop, true);
 
-    this.body.addEventListener("mousemove", this.mousemove);
+    this.parentNode.addEventListener("mousemove", this.mousemove, true);
 
-    this.body.addEventListener("mouseup", this.mouseup);
+    this.parentNode.addEventListener("mouseup", this.mouseup, true);
   }
 
   private removeMoveEvents(): void {
-    const colorDial: HTMLElement = this.dial.colorDial;
+    const colorDial: HTMLElement = this.dialComponents.colorDial;
 
-    colorDial.removeEventListener("mousedown", this.mousedown);
+    colorDial.removeEventListener("mousedown", this.mousedown, true);
 
-    colorDial.removeEventListener("mousemove", this.mousemove);
+    colorDial.removeEventListener("mousemove", this.mousemove, true);
 
-    colorDial.removeEventListener("mouseup", this.mouseup);
+    colorDial.removeEventListener("mouseup", this.mouseup, true);
 
-    colorDial.removeEventListener("dragover", this.preventAll);
+    colorDial.removeEventListener("dragover", this.preventAndStop, true);
 
-    colorDial.removeEventListener("drop", this.preventAll);
+    colorDial.removeEventListener("drop", this.preventAndStop, true);
 
-    this.body.removeEventListener("mousemove", this.mousemove);
+    this.parentNode.removeEventListener("mousemove", this.mousemove, true);
 
-    this.body.removeEventListener("mouseup", this.mouseup);
+    this.parentNode.removeEventListener("mouseup", this.mouseup, true);
   }
 
   private mousedown(e): void {
     const { target } = e;
 
-    if (!target.isSameNode(this.dial.colorDial)) {
+    if (!target.isSameNode(this.dialComponents.colorDial)) {
       return;
     }
 
@@ -108,6 +116,8 @@ export default class ColorDial {
     this.clickPos = [offsetX, offsetY];
 
     this.canMove = true;
+
+    this.activePointerEvents(this.parentNode);
   }
 
   private mousemove(e): void {
@@ -116,53 +126,76 @@ export default class ColorDial {
     }
 
     const { pageX, pageY } = e;
-    const [x, y]: number[] = [pageX - this.clickPos[0], pageY - this.clickPos[1]];
+    const { clientWidth, clientHeight } = this.parentNode;
 
-    this.updatePosition(x, y);
+    const x: number = this.getRightPosition(pageX, this.clickPos[0], COLORDIAL_NODE_WIDTH, clientWidth);
+    const y: number = this.getRightPosition(pageY, this.clickPos[1], COLORDIAL_NODE_HEIGHT, clientHeight);
+
+    this.updateNodePosition(this.dialComponents.colorDial ,x, y);
   }
 
   private mouseup(): void {
     this.canMove = false;
+
+    this.preventPointerEvents(this.parentNode);
   }
 
-  private preventAll(e): void {
+  private preventAndStop(e): void {
     e.preventDefault();
     e.stopPropagation();
   }
 
-  private updatePosition(x: number, y: number): void {
+  private preventPointerEvents(node: HTMLElement): void {
+    node.classList.add("noPointerEvents");
+  }
+
+  private activePointerEvents(node: HTMLElement): void {
+    node.classList.remove("noPointerEvents");
+  }
+
+  private getRightPosition(toClientDis: number, toNodeDis: number, length: number, conteinerLength): number {
+    if (toClientDis - toNodeDis < 0) {
+      return 0;
+    } else if (toClientDis - toNodeDis + length > conteinerLength) {
+      return conteinerLength - length;
+    } else {
+      return toClientDis - toNodeDis;
+    }
+  }
+ 
+  private updateNodePosition(node: HTMLElement, x: number, y: number): void {
     window.requestAnimationFrame(() => {
-      this.dial.colorDial.style.left = x + "px";
-      this.dial.colorDial.style.top = y + "px";
+      node.style.left = x + "px";
+      node.style.top = y + "px";
     });
   }
 
   private attachInputEvents(): void {
-    const { colorInputL, colorInputR } = this.dial;
+    const { colorInputL, colorInputR } = this.dialComponents;
 
-    colorInputL.addEventListener("change", (e) => { this.colorChange(e); });
+    colorInputL.addEventListener("change", this.colorInputChange, true);
 
-    colorInputR.addEventListener("change", (e) => { this.colorChange(e); });
+    colorInputR.addEventListener("change", this.colorInputChange, true);
   }
 
   private removeInputEvents(): void {
-    const { colorInputL, colorInputR } = this.dial;
+    const { colorInputL, colorInputR } = this.dialComponents;
 
-    colorInputL.removeEventListener("change", (e) => { this.colorChange(e); });
+    colorInputL.removeEventListener("change", this.colorInputChange, true);
 
-    colorInputR.removeEventListener("change", (e) => { this.colorChange(e); });
+    colorInputR.removeEventListener("change", this.colorInputChange, true);
   }
 
-  private colorChange(e): void {
+  private colorInputChange(e): void {
     const currentColor = e.target.value;
 
     this.currentColor = currentColor;
 
-    this.updateDisplay();
+    this.updateInputDisplay();
   }
 
-  private updateDisplay() {
-    const { colorInputL, colorInputR } = this.dial;
+  private updateInputDisplay() {
+    const { colorInputL, colorInputR } = this.dialComponents;
 
     colorInputL.value = this.currentColor;
     colorInputR.value = this.currentColor;

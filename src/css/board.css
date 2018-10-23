@@ -43,6 +43,10 @@
   background-color: rgba(0, 0, 0, .5);
 }
 
+.boardContent {
+  pointer-events: initial;
+}
+
 .tmpTopLayer {
   z-index: 1000;
 }

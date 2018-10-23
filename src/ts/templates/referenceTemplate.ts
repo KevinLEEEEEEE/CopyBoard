@@ -1,3 +1,5 @@
+import createAndAppend from '../utils/createAndAppend';
+
 interface IReferenceTemplate {
   referenceBoard: HTMLDivElement;
   content: HTMLDivElement;
@@ -12,22 +14,6 @@ interface IReferenceTemplate {
   lockerBtn: HTMLButtonElement;
   deleteBtn: HTMLButtonElement;
 }
-
-const createAndAppend = <T>(parent: HTMLElement, nodeType: string = "div", ...klass: string[]): T => {
-  const node: any = document.createElement(nodeType);
-
-  if (klass !== null) {
-    klass.forEach((klas) => {
-      node.classList.add(klas);
-    });
-  }
-
-  if (parent !== null) {
-    parent.appendChild(node);
-  }
-
-  return node;
-};
 
 const referenceTemplate = (): IReferenceTemplate => {
   const referenceBoard: HTMLDivElement = createAndAppend<HTMLDivElement>(null, "div", "board", "referenceBoard", "nonePointerEvents");
@@ -89,7 +75,6 @@ const referenceTemplate = (): IReferenceTemplate => {
 };
 
 export {
-  createAndAppend,
   referenceTemplate,
   IReferenceTemplate,
 };

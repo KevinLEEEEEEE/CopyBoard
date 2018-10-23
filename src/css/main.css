@@ -11,3 +11,7 @@ body {
   height: 100vh;
   background-color: rgb(30, 30, 30);
 }
+
+.noPointerEvents {
+  pointer-events: none !important;
+}

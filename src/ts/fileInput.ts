@@ -1,11 +1,11 @@
 type IRegisterFunc = (base64: string, name: string) => void;
 
 export default class FileInput {
-  private readonly inputNode: HTMLElement;
-  private listenters: IRegisterFunc[] = [];
+  private readonly fileInputNode: HTMLElement;
+  private inputEventListeners: IRegisterFunc[] = [];
 
-  constructor(inputNode: HTMLElement) {
-    this.inputNode = inputNode;
+  constructor(fileInputNode: HTMLElement) {
+    this.fileInputNode = fileInputNode;
 
     this.attachInputEvents = this.attachInputEvents.bind(this);
 
@@ -21,42 +21,46 @@ export default class FileInput {
   }
 
   public registerEvents(func: IRegisterFunc): void {
-    this.listenters.push(func);
+    this.inputEventListeners.push(func);
   }
 
   private attachInputEvents(): void {
-    this.inputNode.addEventListener("dragover", this.preventAll);
+    this.fileInputNode.addEventListener("dragover", this.preventAndStop);
 
-    this.inputNode.addEventListener("drop", this.drop);
+    this.fileInputNode.addEventListener("drop", this.drop);
   }
 
   private removeInputEvents() {
-    this.inputNode.removeEventListener("dragover", this.preventAll);
+    this.fileInputNode.removeEventListener("dragover", this.preventAndStop);
 
-    this.inputNode.removeEventListener("drop", this.drop);
+    this.fileInputNode.removeEventListener("drop", this.drop);
   }
 
-  private preventAll(e): void {
+  private preventAndStop(e): void {
     e.preventDefault();
     e.stopPropagation();
   }
 
   private drop(e): void {
-    this.preventAll(e);
+    this.preventAndStop(e);
 
     const { files } = e.dataTransfer;
 
-    this.handleFiles(files);
+    this.handleInputFiles(files);
   }
 
-  private handleFiles(files): void {
+  private handleInputFiles(files): void {
    for (const file of files) {
      const base64: string = window.URL.createObjectURL(file);
      const name: string = file.name.split(".")[0]; // use Regular Expression later
 
-     this.listenters.forEach((listener) => {
-         listener(base64, name);
-       });
+     this.informEventListeners(base64, name);
    }
+  }
+
+  private informEventListeners(base64: string, name: string): void {
+    this.inputEventListeners.forEach((listener) => {
+      listener(base64, name);
+    });
   }
 }
