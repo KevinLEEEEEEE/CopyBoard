@@ -1,8 +1,8 @@
-import createAndAppend from '../utils/createAndAppend';
+import createAndAppend from "../utils/createAndAppend";
 
 interface IReferenceTemplate {
   referenceBoard: HTMLDivElement;
-  content: HTMLDivElement;
+  cvsContainer: HTMLDivElement;
   nameInput: HTMLInputElement;
   opacityBtn: HTMLButtonElement;
   moveUpBtn: HTMLButtonElement;
@@ -16,10 +16,11 @@ interface IReferenceTemplate {
 }
 
 const referenceTemplate = (): IReferenceTemplate => {
-  const referenceBoard: HTMLDivElement = createAndAppend<HTMLDivElement>(null, "div", "board", "referenceBoard", "nonePointerEvents");
+  const referenceBoard: HTMLDivElement =
+  createAndAppend<HTMLDivElement>(null, "div", "board", "referenceBoard", "nonePointerEvents");
 
   const controller: HTMLDivElement = createAndAppend<HTMLDivElement>(referenceBoard, "div", "boardController");
-  const content: HTMLDivElement = createAndAppend<HTMLDivElement>(referenceBoard, "div", "boardContent");
+  const cvsContainer: HTMLDivElement = createAndAppend<HTMLDivElement>(referenceBoard, "div", "boardContent");
 
   const leftPanel: HTMLDivElement = createAndAppend<HTMLDivElement>(controller, "div", "controlPanel", "leftPanel");
   const rightPanel: HTMLDivElement = createAndAppend<HTMLDivElement>(controller, "div", "controlPanel", "rightPanel");
@@ -52,6 +53,7 @@ const referenceTemplate = (): IReferenceTemplate => {
   const deleteBtn: HTMLButtonElement = createAndAppend<HTMLButtonElement>(div6, "button", "delete");
 
   deleteBtn.innerHTML = "delete";
+  lockerBtn.innerHTML = "locker";
 
   moveUpBtn.innerHTML = "up";
   moveTopBtn.innerHTML = "top";
@@ -60,7 +62,7 @@ const referenceTemplate = (): IReferenceTemplate => {
 
   return {
     referenceBoard,
-    content,
+    cvsContainer,
     nameInput,
     opacityBtn,
     moveUpBtn,

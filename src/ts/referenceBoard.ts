@@ -1,168 +1,196 @@
-import { referenceTemplate, IReferenceTemplate } from './templates/referenceTemplate';
 import Board from "./board";
+import { IReferenceTemplate, referenceTemplate } from "./templates/referenceTemplate";
+
+const REFERENCE_CONTROLLER_HEIGHT = 70;
 
 export default class ReferenceBoard extends Board {
-  private readonly reference: IReferenceTemplate;
-  private readonly refCanvas: HTMLCanvasElement;
+  private readonly refDomsPackage: IReferenceTemplate;
   private readonly parentNode: HTMLElement;
-  private readonly base64: string;
-  private clickPos: number[] = [0, 0];
+  private clickOffsetPos: number[] = [0, 0];
+  private clickPagePos: number[] = [0, 0];
   private canMove: boolean = false;
+  private canScale: boolean = false;
 
-  constructor(base64: string, name: string, parentNode: HTMLElement) {
+  constructor(name: string, parentNode: HTMLElement) {
     super(name);
 
     this.parentNode = parentNode;
 
-    this.base64 = base64;
-
-    this.reference = referenceTemplate();
-
-    this.refCanvas = this.getCanvas();
-
-    this.reference.content.appendChild(this.refCanvas);
-
-    this.mousedown = this.mousedown.bind(this);
-
-    this.mousemove = this.mousemove.bind(this);
-
-    this.mouseup = this.mouseup.bind(this);
-
-    this.delete = this.delete.bind(this);
-
-    this.moveUp = this.moveUp.bind(this);
-
-    this.moveTop = this.moveTop.bind(this);
-
-    this.moveDown = this.moveDown.bind(this);
-
-    this.moveBottom = this.moveBottom.bind(this);
+    this.refDomsPackage = referenceTemplate();
   }
 
-  public init(): void {
+  // -----------------------------------------------------------------------------------------
+
+  public init(base64: string): void {
     this.attachMoveEvents();
 
     this.attachLayerBtnEvents();
 
-    this.attachScrollEvents();
-
     this.attachSettingBtnEvents();
 
-    this.initImageDisplay();
+    this.convertBase64ToImage(base64)
+      .then((img) => {
+        this.displayImageOnCanvas(img);
+
+        this.setCanvasParentNode(this.refDomsPackage.cvsContainer);
+
+        this.appendSelfToParentNode();
+      });
   }
 
-  public delete(): void {
+  public delete = (): void => {
     this.removeMoveEvents();
-
-    this.removeScrollEvents();
 
     this.removeLayerBtnEvents();
 
     this.removeSettingBtnEvents();
 
-    this.removeFromParent();
+    this.removeSelfFromParentNode();
   }
 
-  private initImageDisplay(): void {
-    const img = new Image();
+  private convertBase64ToImage(base64: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
 
-    img.onload = () => {
-      const { width, height } = img;
+      img.onload = () => {
+        resolve(img);
+      };
 
-      this.setWidth(width);
+      img.onerror = (err) => {
+        reject(err);
+      };
 
-      this.setHeight(height);
-
-      this.drawImage(img, 0, 0, width, height);
-
-      this.appendIntoParent();
-    };
-
-    img.src = this.base64;
+      img.src = base64;
+    });
   }
 
-  private appendIntoParent(): void {
-    this.parentNode.appendChild(this.reference.referenceBoard);
+  private displayImageOnCanvas(img: HTMLImageElement): void {
+    const { width, height } = img;
+
+    this.setWidth(width);
+
+    this.setHeight(height);
+
+    this.setStyleWidth(width);
+
+    this.setStyleHeight(height);
+
+    this.flushTmpStyleSize();
+
+    this.drawImage(img, 0, 0, width, height);
   }
 
-  private removeFromParent(): void {
-    this.parentNode.removeChild(this.reference.referenceBoard);
+  private appendSelfToParentNode(): void {
+    this.parentNode.appendChild(this.refDomsPackage.referenceBoard);
   }
+
+  private removeSelfFromParentNode(): void {
+    this.parentNode.removeChild(this.refDomsPackage.referenceBoard);
+  }
+
+  // -----------------------------------------------------------------------------------------
 
   private attachMoveEvents(): void {
-    this.refCanvas.addEventListener("mousedown", this.mousedown, true);
+    const { cvsContainer } = this.refDomsPackage;
 
-    this.refCanvas.addEventListener("mousemove", this.mousemove, true);
+    cvsContainer.addEventListener("mousedown", this.mousedown, true);
 
-    this.refCanvas.addEventListener("mouseup", this.mouseup, true);
+    cvsContainer.addEventListener("mousemove", this.mousemove, true);
 
-    this.refCanvas.addEventListener("mouseleave", this.mouseup, true);
+    cvsContainer.addEventListener("mouseup", this.mouseup, true);
+
+    cvsContainer.addEventListener("mouseleave", this.mouseup, true);
   }
 
   private removeMoveEvents(): void {
-    this.refCanvas.removeEventListener("mousedown", this.mousedown, true);
+    const { cvsContainer } = this.refDomsPackage;
 
-    this.refCanvas.removeEventListener("mousemove", this.mousemove, true);
+    cvsContainer.removeEventListener("mousedown", this.mousedown, true);
 
-    this.refCanvas.removeEventListener("mouseup", this.mouseup, true);
+    cvsContainer.removeEventListener("mousemove", this.mousemove, true);
+
+    cvsContainer.removeEventListener("mouseup", this.mouseup, true);
+
+    cvsContainer.removeEventListener("mouseleave", this.mouseup, true);
   }
 
-  private mousedown(e): void {
+  private mousedown = (e): void => {
     const { target } = e;
 
-    if (!target.isSameNode(this.refCanvas)) {
+    if (!this.canAcceptMousedown(target)) {
       return;
     }
 
-    const { offsetX, offsetY } = e;
+    this.updateMouseData(e);
 
-    this.clickPos = [offsetX, offsetY];
+    this.updateMouseState(e);
 
-    this.canMove = true;
-
-    this.moveToTopLevel(this.reference.referenceBoard)
+    this.moveSelfToTopLevel();
   }
 
-  private mousemove(e): void {
-    if (this.canMove !== true) {
-      return;
+  private mousemove = (e): void => {
+    if (this.canMove === true) {
+      this.mousemoveForMove(e);
+    } else if (this.canScale === true) {
+      this.mousemoveForScale(e);
     }
-
-    const { pageX, pageY } = e;
-    const { clientWidth, clientHeight } = this.parentNode;
-
-    // small size, with border, large size, no border
-
-    const x: number = this.getRightPosition(pageX, this.clickPos[0], this.getWidth(), clientWidth);
-    const y: number = this.getRightPosition(pageY, this.clickPos[1] + 70, this.getHeight() + 70, clientHeight);
-
-    this.updateNodePosition(this.reference.referenceBoard, x, y);
   }
 
-  private mouseup(): void {
-    this.canMove = false;
+  private mouseup = (): void => {
+    this.restoreMouseState();
 
-    this.moveBackFromTopLevel(this.reference.referenceBoard);
+    this.flushTmpStyleSize();
+
+    this.moveSelfBackFromTopLevel();
   }
 
-  private moveToTopLevel(node: HTMLElement): void {
-    node.classList.add("tmpTopLayer");
+  private canAcceptMousedown(target: HTMLElement): boolean {
+    return this.refDomsPackage.cvsContainer.contains(target) && !this.islocked();
   }
 
-  private moveBackFromTopLevel(node: HTMLElement): void {
-    node.classList.remove("tmpTopLayer");
+  private updateMouseData(e): void {
+    const { offsetX, offsetY, pageX, pageY } = e;
+
+    this.clickOffsetPos = [offsetX, offsetY];
+    this.clickPagePos = [pageX, pageY];
   }
 
-  private getRightPosition(toClientDis: number, toNodeDis: number, length: number, conteinerLength): number {
-    if (toClientDis - toNodeDis < 0) {
-      return 0;
-    } else if (toClientDis - toNodeDis + length > conteinerLength) {
-      return conteinerLength - length;
+  private updateMouseState(e): void {
+    if (e.ctrlKey === true) {
+      this.canScale = true;
     } else {
-      return toClientDis - toNodeDis;
+      this.canMove = true;
     }
   }
- 
+
+  private restoreMouseState(): void {
+    this.canMove = false;
+    this.canScale = false;
+  }
+
+  private mousemoveForMove(e): void {
+    const { pageX, pageY } = e;
+
+    const x: number = pageX - this.clickOffsetPos[0];
+    const y: number = pageY - this.clickOffsetPos[1] - REFERENCE_CONTROLLER_HEIGHT;
+
+    this.updateNodePosition(this.refDomsPackage.referenceBoard, x, y);
+  }
+
+  private mousemoveForScale(e): void {
+    const moveDistance = e.pageX - this.clickPagePos[0];
+
+    this.scale(moveDistance * 0.01 + 1);
+  }
+
+  private moveSelfToTopLevel(): void {
+    this.refDomsPackage.referenceBoard.classList.add("tmpTopLayer");
+  }
+
+  private moveSelfBackFromTopLevel(): void {
+    this.refDomsPackage.referenceBoard.classList.remove("tmpTopLayer");
+  }
+
   private updateNodePosition(node: HTMLElement, x: number, y: number): void {
     window.requestAnimationFrame(() => {
       node.style.left = x + "px";
@@ -170,40 +198,34 @@ export default class ReferenceBoard extends Board {
     });
   }
 
-  private attachScrollEvents(): void {
-
-  }
-
-  private removeScrollEvents(): void {
-
-  }
+  // -----------------------------------------------------------------------------------------
 
   private attachLayerBtnEvents(): void {
-    const { moveUpBtn, moveTopBtn, moveDownBtn, moveBottomBtn } = this.reference;
+    const { moveUpBtn, moveTopBtn, moveDownBtn, moveBottomBtn } = this.refDomsPackage;
 
-    moveUpBtn.addEventListener("click", this.moveUp);
+    moveUpBtn.addEventListener("click", this.moveUp, true);
 
-    moveTopBtn.addEventListener("click", this.moveTop);
+    moveTopBtn.addEventListener("click", this.moveTop, true);
 
-    moveDownBtn.addEventListener("click", this.moveDown);
+    moveDownBtn.addEventListener("click", this.moveDown, true);
 
-    moveBottomBtn.addEventListener("click", this.moveBottom);
+    moveBottomBtn.addEventListener("click", this.moveBottom, true);
   }
 
   private removeLayerBtnEvents(): void {
-    const { moveUpBtn, moveTopBtn, moveDownBtn, moveBottomBtn } = this.reference;
+    const { moveUpBtn, moveTopBtn, moveDownBtn, moveBottomBtn } = this.refDomsPackage;
 
-    moveUpBtn.removeEventListener("click", this.moveUp);
+    moveUpBtn.removeEventListener("click", this.moveUp, true);
 
-    moveTopBtn.removeEventListener("click", this.moveTop);
+    moveTopBtn.removeEventListener("click", this.moveTop, true);
 
-    moveDownBtn.removeEventListener("click", this.moveDown);
+    moveDownBtn.removeEventListener("click", this.moveDown, true);
 
-    moveBottomBtn.removeEventListener("click", this.moveBottom);
+    moveBottomBtn.removeEventListener("click", this.moveBottom, true);
   }
 
-  private moveUp(): void {
-    const { nextSibling } = this.reference.referenceBoard;
+  private moveUp = (): void => {
+    const { nextSibling } = this.refDomsPackage.referenceBoard;
 
     if (nextSibling !== null) {
       const { nextSibling: nextSiblingOfNext } = nextSibling;
@@ -211,40 +233,50 @@ export default class ReferenceBoard extends Board {
       if (nextSiblingOfNext === null) {
         this.moveTop();
       } else {
-        this.parentNode.insertBefore(this.reference.referenceBoard, nextSiblingOfNext);
+        this.parentNode.insertBefore(this.refDomsPackage.referenceBoard, nextSiblingOfNext);
       }
     }
   }
 
-  private moveTop(): void {
-    this.parentNode.appendChild(this.reference.referenceBoard);
+  private moveTop = (): void => {
+    this.parentNode.appendChild(this.refDomsPackage.referenceBoard);
   }
 
-  private moveDown(): void {
-    const { previousSibling } = this.reference.referenceBoard;
+  private moveDown = (): void => {
+    const { previousSibling } = this.refDomsPackage.referenceBoard;
 
     if (previousSibling !== null) {
-      this.parentNode.insertBefore(this.reference.referenceBoard, previousSibling);
+      this.parentNode.insertBefore(this.refDomsPackage.referenceBoard, previousSibling);
     }
   }
 
-  private moveBottom(): void {
+  private moveBottom = (): void => {
     const { firstChild } = this.parentNode;
 
-    if(firstChild !== null && !this.reference.referenceBoard.isSameNode(firstChild)) {
-      this.parentNode.insertBefore(this.reference.referenceBoard, firstChild);
+    if (firstChild !== null && !this.refDomsPackage.referenceBoard.isSameNode(firstChild)) {
+      this.parentNode.insertBefore(this.refDomsPackage.referenceBoard, firstChild);
     }
   }
 
+  // -----------------------------------------------------------------------------------------
+
   private attachSettingBtnEvents() {
-    
+    const { deleteBtn, lockerBtn } = this.refDomsPackage;
+
+    deleteBtn.addEventListener("click", this.delete, true);
+
+    lockerBtn.addEventListener("click", this.locker, true);
   }
 
   private removeSettingBtnEvents() {
-    
+    const { deleteBtn, lockerBtn } = this.refDomsPackage;
+
+    deleteBtn.removeEventListener("click", this.delete, true);
+
+    lockerBtn.removeEventListener("click", this.locker, true);
+  }
+
+  private locker = (): void => {
+    this.islocked() === true ? this.unlock() : this.lock();
   }
 }
-
-// delete. lock, styleSize, scroll, border
-
-

@@ -12,6 +12,8 @@ export default class FileInput {
     this.drop = this.drop.bind(this);
   }
 
+  // -----------------------------------------------------------------------------------------
+
   public init(): void {
     this.attachInputEvents();
   }
@@ -23,6 +25,8 @@ export default class FileInput {
   public registerEvents(func: IRegisterFunc): void {
     this.inputEventListeners.push(func);
   }
+
+  // -----------------------------------------------------------------------------------------
 
   private attachInputEvents(): void {
     this.fileInputNode.addEventListener("dragover", this.preventAndStop);
@@ -48,6 +52,8 @@ export default class FileInput {
 
     this.handleInputFiles(files);
   }
+
+  // -----------------------------------------------------------------------------------------
 
   private handleInputFiles(files): void {
    for (const file of files) {

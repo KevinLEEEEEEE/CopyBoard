@@ -1,6 +1,6 @@
 import ColorDial from "./colorDial";
 import FileInput from "./fileInput";
-import ReferenceBoard from './referenceBoard';
+import ReferenceBoard from "./referenceBoard";
 
 export default class Main {
   public init() {
@@ -24,8 +24,8 @@ export default class Main {
 
   private addReferencrBoard(base64: string, name: string): void {
     const mainDom: HTMLElement = document.getElementById("main");
-    const referenceBoard = new ReferenceBoard(base64, name, mainDom);
+    const referenceBoard = new ReferenceBoard(name, mainDom);
 
-    referenceBoard.init();
+    referenceBoard.init(base64);
   }
 }

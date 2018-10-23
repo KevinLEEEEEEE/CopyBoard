@@ -5,35 +5,29 @@ const COLORDIAL_NODE_WIDTH = 100;
 const COLORDIAL_NODE_HEIGHT = 100;
 
 export default class ColorDial {
-  private readonly parentNode: HTMLElement;
-  private readonly dialComponents: IColorDialTemplate;
+  private readonly dialDomsPackage: IColorDialTemplate;
   private readonly colorConversion: ColorConversion;
+  private readonly parentNode: HTMLElement;
   private currentColor: string = "#000000";
-  private clickPos: number[] = [0, 0];
+  private clickOffsetPos: number[] = [0, 0];
   private canMove: boolean = false;
 
   constructor(parentNode: HTMLElement) {
     this.parentNode = parentNode;
 
-    this.dialComponents = colorDialTemplate();
+    this.dialDomsPackage = colorDialTemplate();
 
     this.colorConversion = new ColorConversion();
-
-    this.mousedown = this.mousedown.bind(this);
-
-    this.mousemove = this.mousemove.bind(this);
-
-    this.mouseup = this.mouseup.bind(this);
-
-    this.colorInputChange = this.colorInputChange.bind(this);
   }
+
+  // -----------------------------------------------------------------------------------------
 
   public init(): void {
     this.attachMoveEvents();
 
     this.attachInputEvents();
 
-    this.appendIntoParent();
+    this.appendSelfToParentNode();
   }
 
   public delete(): void {
@@ -41,8 +35,10 @@ export default class ColorDial {
 
     this.removeInputEvents();
 
-    this.removeFromParent();
+    this.removeSelfFromParentNode();
   }
+
+  // -----------------------------------------------------------------------------------------
 
   public getColor(): number[] {
     return this.colorConversion.hexToRgb(this.currentColor);
@@ -60,16 +56,20 @@ export default class ColorDial {
     this.updateInputDisplay();
   }
 
-  private appendIntoParent(): void {
-    this.parentNode.appendChild(this.dialComponents.colorDial);
+  // -----------------------------------------------------------------------------------------
+
+  private appendSelfToParentNode(): void {
+    this.parentNode.appendChild(this.dialDomsPackage.colorDial);
   }
 
-  private removeFromParent(): void {
-    this.parentNode.removeChild(this.dialComponents.colorDial);
+  private removeSelfFromParentNode(): void {
+    this.parentNode.removeChild(this.dialDomsPackage.colorDial);
   }
+
+  // -----------------------------------------------------------------------------------------
 
   private attachMoveEvents(): void {
-    const colorDial: HTMLElement = this.dialComponents.colorDial;
+    const colorDial: HTMLElement = this.dialDomsPackage.colorDial;
 
     colorDial.addEventListener("mousedown", this.mousedown, true);
 
@@ -87,7 +87,7 @@ export default class ColorDial {
   }
 
   private removeMoveEvents(): void {
-    const colorDial: HTMLElement = this.dialComponents.colorDial;
+    const colorDial: HTMLElement = this.dialDomsPackage.colorDial;
 
     colorDial.removeEventListener("mousedown", this.mousedown, true);
 
@@ -104,23 +104,23 @@ export default class ColorDial {
     this.parentNode.removeEventListener("mouseup", this.mouseup, true);
   }
 
-  private mousedown(e): void {
+  private mousedown = (e): void => {
     const { target } = e;
 
-    if (!target.isSameNode(this.dialComponents.colorDial)) {
+    if (!target.isSameNode(this.dialDomsPackage.colorDial)) {
       return;
     }
 
     const { offsetX, offsetY } = e;
 
-    this.clickPos = [offsetX, offsetY];
+    this.clickOffsetPos = [offsetX, offsetY];
 
     this.canMove = true;
 
     this.activePointerEvents(this.parentNode);
   }
 
-  private mousemove(e): void {
+  private mousemove = (e): void => {
     if (this.canMove !== true) {
       return;
     }
@@ -128,13 +128,13 @@ export default class ColorDial {
     const { pageX, pageY } = e;
     const { clientWidth, clientHeight } = this.parentNode;
 
-    const x: number = this.getRightPosition(pageX, this.clickPos[0], COLORDIAL_NODE_WIDTH, clientWidth);
-    const y: number = this.getRightPosition(pageY, this.clickPos[1], COLORDIAL_NODE_HEIGHT, clientHeight);
+    const x: number = this.getRightPosition(pageX, this.clickOffsetPos[0], COLORDIAL_NODE_WIDTH, clientWidth);
+    const y: number = this.getRightPosition(pageY, this.clickOffsetPos[1], COLORDIAL_NODE_HEIGHT, clientHeight);
 
-    this.updateNodePosition(this.dialComponents.colorDial ,x, y);
+    this.updateNodePosition(this.dialDomsPackage.colorDial , x, y);
   }
 
-  private mouseup(): void {
+  private mouseup = (): void => {
     this.canMove = false;
 
     this.preventPointerEvents(this.parentNode);
@@ -162,7 +162,7 @@ export default class ColorDial {
       return toClientDis - toNodeDis;
     }
   }
- 
+
   private updateNodePosition(node: HTMLElement, x: number, y: number): void {
     window.requestAnimationFrame(() => {
       node.style.left = x + "px";
@@ -170,8 +170,10 @@ export default class ColorDial {
     });
   }
 
+  // -----------------------------------------------------------------------------------------
+
   private attachInputEvents(): void {
-    const { colorInputL, colorInputR } = this.dialComponents;
+    const { colorInputL, colorInputR } = this.dialDomsPackage;
 
     colorInputL.addEventListener("change", this.colorInputChange, true);
 
@@ -179,14 +181,14 @@ export default class ColorDial {
   }
 
   private removeInputEvents(): void {
-    const { colorInputL, colorInputR } = this.dialComponents;
+    const { colorInputL, colorInputR } = this.dialDomsPackage;
 
     colorInputL.removeEventListener("change", this.colorInputChange, true);
 
     colorInputR.removeEventListener("change", this.colorInputChange, true);
   }
 
-  private colorInputChange(e): void {
+  private colorInputChange = (e): void => {
     const currentColor = e.target.value;
 
     this.currentColor = currentColor;
@@ -195,7 +197,7 @@ export default class ColorDial {
   }
 
   private updateInputDisplay() {
-    const { colorInputL, colorInputR } = this.dialComponents;
+    const { colorInputL, colorInputR } = this.dialDomsPackage;
 
     colorInputL.value = this.currentColor;
     colorInputR.value = this.currentColor;
