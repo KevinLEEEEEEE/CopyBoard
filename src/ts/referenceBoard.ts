@@ -14,7 +14,7 @@ export default class ReferenceBoard extends Board {
   private tmpBoardSize: number[] = [0, 0];
   private canMove: boolean = false;
   private canScale: boolean = false;
-  private pixelate: Pixelate;
+  private pixelateInstance: Pixelate;
 
   constructor(name: string, parentNode: HTMLElement) {
     super(name);
@@ -28,7 +28,7 @@ export default class ReferenceBoard extends Board {
 
   /**
    * run after instance to attach events and add self to don tree
-   * @param base64 
+   * @param base64
    */
   public init(base64: string): void {
     this.attachMoveEvents();
@@ -36,6 +36,8 @@ export default class ReferenceBoard extends Board {
     this.attachLayerBtnEvents();
 
     this.attachSettingBtnEvents();
+
+    this.attachToolsBtnEvebts();
 
     this.convertBase64ToImage(base64)
       .then((img) => {
@@ -59,17 +61,15 @@ export default class ReferenceBoard extends Board {
 
     this.removeSettingBtnEvents();
 
+    this.removeToolsBtnEvebts();
+
     this.removeSelfFromParentNode();
   }
 
   private initPixelatedUtils() {
     const imageData = this.getImageData();
 
-    console.log(imageData);
-
-    this.pixelate = new Pixelate(imageData);
-
-    this.pixelate.getPixelatedImageData(1);
+    this.pixelateInstance = new Pixelate(imageData);
   }
 
   private convertBase64ToImage(base64: string): Promise<HTMLImageElement> {
@@ -223,7 +223,7 @@ export default class ReferenceBoard extends Board {
 
   private mousemoveForScale(e): void {
     const moveDistance = e.pageX - this.clickPagePos[0];
-    const scaleRatio = moveDistance * 0.01 + 1;
+    const scaleRatio = moveDistance * 0.005 + 1;
 
     const scaledWidth = this.tmpBoardSize[0] * scaleRatio;
     const scaledHeight = this.tmpBoardSize[1] * scaleRatio;
@@ -329,5 +329,31 @@ export default class ReferenceBoard extends Board {
 
   private locker = (): void => {
     this.islocked() === true ? this.unlock() : this.lock();
+  }
+
+  // -----------------------------------------------------------------------------------------
+
+  private attachToolsBtnEvebts() {
+    const { colorPickerBtn, pixelateBtn } = this.refDomsPackage;
+
+    colorPickerBtn.addEventListener("click", this.colorPicker, true);
+
+    pixelateBtn.addEventListener("click", this.pixelate, true);
+  }
+
+  private removeToolsBtnEvebts() {
+    const { colorPickerBtn, pixelateBtn } = this.refDomsPackage;
+
+    colorPickerBtn.removeEventListener("click", this.colorPicker, true);
+
+    pixelateBtn.removeEventListener("click", this.pixelate, true);
+  }
+
+  private colorPicker = () => {
+    console.log("plcker");
+  }
+
+  private pixelate = () => {
+    this.pixelateInstance.getPixelatedImageData(3);
   }
 }

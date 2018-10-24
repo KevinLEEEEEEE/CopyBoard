@@ -9,8 +9,8 @@ interface IReferenceTemplate {
   moveTopBtn: HTMLButtonElement;
   moveDownBtn: HTMLButtonElement;
   moveBottomBtn: HTMLButtonElement;
-  colorSelectorBtn: HTMLButtonElement;
-  binBtn: HTMLButtonElement;
+  colorPickerBtn: HTMLButtonElement;
+  pixelateBtn: HTMLButtonElement;
   lockerBtn: HTMLButtonElement;
   deleteBtn: HTMLButtonElement;
 }
@@ -45,8 +45,8 @@ const referenceTemplate = (): IReferenceTemplate => {
   const moveBottomBtn: HTMLButtonElement = createAndAppend<HTMLButtonElement>(div4, "button", "moveBottom");
 
   const div5: HTMLDivElement = createAndAppend<HTMLDivElement>(rightPanel, "div");
-  const colorSelectorBtn: HTMLButtonElement = createAndAppend<HTMLButtonElement>(div5, "button", "colorSelector");
-  const binBtn: HTMLButtonElement = createAndAppend<HTMLButtonElement>(div5, "button", "bin");
+  const colorPickerBtn: HTMLButtonElement = createAndAppend<HTMLButtonElement>(div5, "button", "colorSelector");
+  const pixelateBtn: HTMLButtonElement = createAndAppend<HTMLButtonElement>(div5, "button", "bin");
 
   const div6: HTMLDivElement = createAndAppend<HTMLDivElement>(rightPanel, "div");
   const lockerBtn: HTMLButtonElement = createAndAppend<HTMLButtonElement>(div6, "button", "locker");
@@ -59,6 +59,8 @@ const referenceTemplate = (): IReferenceTemplate => {
   moveTopBtn.innerHTML = "top";
   moveDownBtn.innerHTML = "down";
   moveBottomBtn.innerHTML = "bottom";
+  colorPickerBtn.innerHTML = "picker";
+  pixelateBtn.innerHTML = "pixelize";
 
   return {
     referenceBoard,
@@ -69,8 +71,8 @@ const referenceTemplate = (): IReferenceTemplate => {
     moveTopBtn,
     moveDownBtn,
     moveBottomBtn,
-    colorSelectorBtn,
-    binBtn,
+    colorPickerBtn,
+    pixelateBtn,
     lockerBtn,
     deleteBtn,
   };
