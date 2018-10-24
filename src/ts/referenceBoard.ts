@@ -3,8 +3,9 @@ import { IReferenceTemplate, referenceTemplate } from "./templates/referenceTemp
 import Pixelate from "./utils/pixelate";
 
 const REFERENCE_CONTROLLER_HEIGHT = 70;
-const MIN_BOARD_WIDTH = 300;
+const DEFAULT_SCALE_RATIO = 0.005;
 const WIDTH_LIMITAION_RATIO = 3;
+const MIN_BOARD_WIDTH = 300;
 
 export default class ReferenceBoard extends Board {
   private readonly refDomsPackage: IReferenceTemplate;
@@ -222,8 +223,7 @@ export default class ReferenceBoard extends Board {
   }
 
   private mousemoveForScale(e): void {
-    const moveDistance = e.pageX - this.clickPagePos[0];
-    const scaleRatio = moveDistance * 0.005 + 1;
+    const scaleRatio = this.getScaleRatio(this.clickPagePos[0], e.pageX);
 
     const scaledWidth = this.tmpBoardSize[0] * scaleRatio;
     const scaledHeight = this.tmpBoardSize[1] * scaleRatio;
@@ -232,6 +232,13 @@ export default class ReferenceBoard extends Board {
       this.setStyleWidth(scaledWidth);
       this.setStyleHeight(scaledHeight);
     }
+  }
+
+  private getScaleRatio(startPoint: number, endPoint: number): number {
+    const moveDistance = endPoint - startPoint;
+    const scaleRatio = moveDistance * DEFAULT_SCALE_RATIO + 1;
+
+    return scaleRatio;
   }
 
   private moveSelfToTopLayer(): void {
