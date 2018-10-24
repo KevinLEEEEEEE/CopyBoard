@@ -1,7 +1,7 @@
 .board {
   position: absolute;
-  left: 100px;
-  top: 500px;
+  left: 50px;
+  top: 0px;
 }
 
 .boardController {

@@ -22,6 +22,9 @@ export default class ColorDial {
 
   // -----------------------------------------------------------------------------------------
 
+  /**
+   * run after instance to attach events and add self to don tree
+   */
   public init(): void {
     this.attachMoveEvents();
 
@@ -30,6 +33,9 @@ export default class ColorDial {
     this.appendSelfToParentNode();
   }
 
+  /**
+   * delete all events as well as the node self
+   */
   public delete(): void {
     this.removeMoveEvents();
 
@@ -40,6 +46,9 @@ export default class ColorDial {
 
   // -----------------------------------------------------------------------------------------
 
+  /**
+   * get current color in an array like [r, g, a]
+   */
   public getColor(): number[] {
     return this.colorConversion.hexToRgb(this.currentColor);
   }

@@ -4,6 +4,7 @@ import Pixelate from "./utils/pixelate";
 
 const REFERENCE_CONTROLLER_HEIGHT = 70;
 const MIN_BOARD_WIDTH = 300;
+const WIDTH_LIMITAION_RATIO = 3;
 
 export default class ReferenceBoard extends Board {
   private readonly refDomsPackage: IReferenceTemplate;
@@ -25,6 +26,10 @@ export default class ReferenceBoard extends Board {
 
   // -----------------------------------------------------------------------------------------
 
+  /**
+   * run after instance to attach events and add self to don tree
+   * @param base64 
+   */
   public init(base64: string): void {
     this.attachMoveEvents();
 
@@ -44,6 +49,9 @@ export default class ReferenceBoard extends Board {
       });
   }
 
+  /**
+   * delete all events as well as the node self
+   */
   public delete = (): void => {
     this.removeMoveEvents();
 
@@ -87,11 +95,25 @@ export default class ReferenceBoard extends Board {
 
     this.setHeight(height);
 
+    this.scaleImageToFitTheParentSize(img);
+
+    this.drawImage(img, 0, 0, width, height);
+  }
+
+  private scaleImageToFitTheParentSize(img: HTMLImageElement): void {
+    let { width, height } = img;
+    const { clientWidth } = this.parentNode;
+    const limitedWidth = clientWidth / WIDTH_LIMITAION_RATIO;
+
+    if (width > limitedWidth) {
+      const scaleRatio = width / limitedWidth;
+      width = limitedWidth;
+      height /= scaleRatio;
+    }
+
     this.setStyleWidth(width);
 
     this.setStyleHeight(height);
-
-    this.drawImage(img, 0, 0, width, height);
   }
 
   private appendSelfToParentNode(): void {
@@ -135,13 +157,13 @@ export default class ReferenceBoard extends Board {
       return;
     }
 
-    this.updateMouseData(e);
+    this.updateMousePosition(e);
 
-    this.updateSizeData();
+    this.updateBoardSize();
 
     this.updateMouseState(e);
 
-    this.moveSelfToTopLevel();
+    this.moveSelfToTopLayer();
   }
 
   private mousemove = (e): void => {
@@ -155,27 +177,28 @@ export default class ReferenceBoard extends Board {
   private mouseup = (): void => {
     this.restoreMouseState();
 
-    this.moveSelfBackFromTopLevel();
+    this.moveSelfBackFromTopLayer();
   }
 
   private canAcceptMousedown(target: HTMLElement): boolean {
     return this.refDomsPackage.cvsContainer.contains(target) && !this.islocked();
   }
 
-  private updateMouseData(e): void {
+  private updateMousePosition(e): void {
     const { offsetX, offsetY, pageX, pageY } = e;
 
     this.clickOffsetPos = [offsetX, offsetY];
     this.clickPagePos = [pageX, pageY];
   }
 
-  private updateSizeData(): void {
+  private updateBoardSize(): void {
     const w = this.getStyleWidth();
     const h = this.getStyleHeight();
 
     this.tmpBoardSize = [w, h];
   }
 
+  // move mouse with 'ctrl' key pressed means to scale the image
   private updateMouseState(e): void {
     if (e.ctrlKey === true) {
       this.canScale = true;
@@ -211,11 +234,11 @@ export default class ReferenceBoard extends Board {
     }
   }
 
-  private moveSelfToTopLevel(): void {
+  private moveSelfToTopLayer(): void {
     this.refDomsPackage.referenceBoard.classList.add("tmpTopLayer");
   }
 
-  private moveSelfBackFromTopLevel(): void {
+  private moveSelfBackFromTopLayer(): void {
     this.refDomsPackage.referenceBoard.classList.remove("tmpTopLayer");
   }
 
