@@ -1,15 +1,19 @@
 import Board from "./board";
 import { IReferenceTemplate, referenceTemplate } from "./templates/referenceTemplate";
+import Pixelate from "./utils/pixelate";
 
 const REFERENCE_CONTROLLER_HEIGHT = 70;
+const MIN_BOARD_WIDTH = 300;
 
 export default class ReferenceBoard extends Board {
   private readonly refDomsPackage: IReferenceTemplate;
   private readonly parentNode: HTMLElement;
   private clickOffsetPos: number[] = [0, 0];
   private clickPagePos: number[] = [0, 0];
+  private tmpBoardSize: number[] = [0, 0];
   private canMove: boolean = false;
   private canScale: boolean = false;
+  private pixelate: Pixelate;
 
   constructor(name: string, parentNode: HTMLElement) {
     super(name);
@@ -32,6 +36,8 @@ export default class ReferenceBoard extends Board {
       .then((img) => {
         this.displayImageOnCanvas(img);
 
+        this.initPixelatedUtils();
+
         this.setCanvasParentNode(this.refDomsPackage.cvsContainer);
 
         this.appendSelfToParentNode();
@@ -46,6 +52,16 @@ export default class ReferenceBoard extends Board {
     this.removeSettingBtnEvents();
 
     this.removeSelfFromParentNode();
+  }
+
+  private initPixelatedUtils() {
+    const imageData = this.getImageData();
+
+    console.log(imageData);
+
+    this.pixelate = new Pixelate(imageData);
+
+    this.pixelate.getPixelatedImageData(1);
   }
 
   private convertBase64ToImage(base64: string): Promise<HTMLImageElement> {
@@ -74,8 +90,6 @@ export default class ReferenceBoard extends Board {
     this.setStyleWidth(width);
 
     this.setStyleHeight(height);
-
-    this.flushTmpStyleSize();
 
     this.drawImage(img, 0, 0, width, height);
   }
@@ -123,6 +137,8 @@ export default class ReferenceBoard extends Board {
 
     this.updateMouseData(e);
 
+    this.updateSizeData();
+
     this.updateMouseState(e);
 
     this.moveSelfToTopLevel();
@@ -139,8 +155,6 @@ export default class ReferenceBoard extends Board {
   private mouseup = (): void => {
     this.restoreMouseState();
 
-    this.flushTmpStyleSize();
-
     this.moveSelfBackFromTopLevel();
   }
 
@@ -153,6 +167,13 @@ export default class ReferenceBoard extends Board {
 
     this.clickOffsetPos = [offsetX, offsetY];
     this.clickPagePos = [pageX, pageY];
+  }
+
+  private updateSizeData(): void {
+    const w = this.getStyleWidth();
+    const h = this.getStyleHeight();
+
+    this.tmpBoardSize = [w, h];
   }
 
   private updateMouseState(e): void {
@@ -179,8 +200,15 @@ export default class ReferenceBoard extends Board {
 
   private mousemoveForScale(e): void {
     const moveDistance = e.pageX - this.clickPagePos[0];
+    const scaleRatio = moveDistance * 0.01 + 1;
 
-    this.scale(moveDistance * 0.01 + 1);
+    const scaledWidth = this.tmpBoardSize[0] * scaleRatio;
+    const scaledHeight = this.tmpBoardSize[1] * scaleRatio;
+
+    if (scaledWidth > MIN_BOARD_WIDTH) {
+      this.setStyleWidth(scaledWidth);
+      this.setStyleHeight(scaledHeight);
+    }
   }
 
   private moveSelfToTopLevel(): void {

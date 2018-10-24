@@ -1,7 +1,7 @@
 
 export default class Board {
-  private canvas: HTMLCanvasElement;
-  private ctx: CanvasRenderingContext2D;
+  private readonly canvas: HTMLCanvasElement;
+  private readonly ctx: CanvasRenderingContext2D;
   private name: string;
   private opacity: number = 1;
   private locked: boolean = false;
@@ -9,8 +9,6 @@ export default class Board {
   private height: number = 0;
   private cssWidth: number = 0;
   private cssHeight: number = 0;
-  private tmpCssWidth: number = 0;
-  private tmpCssHeight: number = 0;
 
   constructor(name: string) {
     this.name = name;
@@ -44,6 +42,10 @@ export default class Board {
 
   public getOpacity(): number {
     return this.opacity;
+  }
+
+  public getImageData(): ImageData {
+    return this.ctx.getImageData(0, 0, this.width, this.height);
   }
 
   // -----------------------------------------------------------------------------------------
@@ -96,22 +98,6 @@ export default class Board {
 
   public islocked(): boolean {
     return this.locked;
-  }
-
-  public scale(ratio: number) {
-    const newWidth = this.tmpCssWidth * ratio;
-    const newHeight = this.tmpCssHeight * ratio;
-
-    if (newWidth > 300) { // improvement required
-      this.setStyleWidth(newWidth);
-
-      this.setStyleHeight(newHeight);
-    }
-  }
-
-  public flushTmpStyleSize() {
-    this.tmpCssWidth = this.cssWidth;
-    this.tmpCssHeight = this.cssHeight;
   }
 
   // -----------------------------------------------------------------------------------------
