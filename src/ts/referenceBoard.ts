@@ -1,5 +1,6 @@
 import Board from "./board";
 import { IReferenceTemplate, referenceTemplate } from "./templates/referenceTemplate";
+import Log from "./utils/log/log";
 import Pixelate from "./utils/pixelate";
 
 const REFERENCE_CONTROLLER_HEIGHT = 70;
@@ -16,6 +17,7 @@ export default class ReferenceBoard extends Board {
   private canMove: boolean = false;
   private canScale: boolean = false;
   private pixelateInstance: Pixelate;
+  private logger: Log;
 
   constructor(name: string, parentNode: HTMLElement) {
     super(name);
@@ -23,6 +25,8 @@ export default class ReferenceBoard extends Board {
     this.parentNode = parentNode;
 
     this.refDomsPackage = referenceTemplate();
+
+    this.logger = new Log();
   }
 
   // -----------------------------------------------------------------------------------------
@@ -49,6 +53,10 @@ export default class ReferenceBoard extends Board {
         this.setCanvasParentNode(this.refDomsPackage.cvsContainer);
 
         this.appendSelfToParentNode();
+
+        this.logger.info("reference board init successfully");
+      }, (err) => {
+        this.logger.error("fail to convert base64 to image");
       });
   }
 
@@ -357,15 +365,15 @@ export default class ReferenceBoard extends Board {
   }
 
   private colorPicker = () => {
-    console.log("plcker");
+    this.logger.info("picker");
   }
 
   private pixelate = () => {
-    this.pixelateInstance.getPixelatedImageData(4, 4)
+    const pixelSize = 20;
+
+    this.pixelateInstance.getPixelatedImageData(pixelSize, pixelSize)
     .then((imageData) => {
       this.drawImageData(imageData);
     });
-
-    // this.drawImageData(ig);
   }
 }

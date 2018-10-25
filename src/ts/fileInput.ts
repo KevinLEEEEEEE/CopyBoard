@@ -1,21 +1,24 @@
+import Log from "./utils/log/log";
+
 type IRegisterFunc = (base64: string, name: string) => void;
 
 export default class FileInput {
   private readonly fileInputNode: HTMLElement;
   private inputEventListeners: IRegisterFunc[] = [];
+  private logger: Log;
 
   constructor(fileInputNode: HTMLElement) {
     this.fileInputNode = fileInputNode;
 
-    this.attachInputEvents = this.attachInputEvents.bind(this);
-
-    this.drop = this.drop.bind(this);
+    this.logger = new Log();
   }
 
   // -----------------------------------------------------------------------------------------
 
   public init(): void {
     this.attachInputEvents();
+
+    this.logger.info("init fileInput successfully");
   }
 
   public delete(): void {
@@ -40,12 +43,12 @@ export default class FileInput {
     this.fileInputNode.removeEventListener("drop", this.drop);
   }
 
-  private preventAndStop(e): void {
+  private preventAndStop = (e): void => {
     e.preventDefault();
     e.stopPropagation();
   }
 
-  private drop(e): void {
+  private drop = (e): void => {
     this.preventAndStop(e);
 
     const { files } = e.dataTransfer;

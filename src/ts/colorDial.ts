@@ -1,5 +1,6 @@
 import { colorDialTemplate, IColorDialTemplate } from "./templates/colorDialTemplate";
 import ColorConversion from "./utils/colorConversion";
+import Log from "./utils/log/log";
 
 const COLORDIAL_NODE_WIDTH = 100;
 const COLORDIAL_NODE_HEIGHT = 100;
@@ -11,6 +12,7 @@ export default class ColorDial {
   private currentColor: string = "#000000";
   private clickOffsetPos: number[] = [0, 0];
   private canMove: boolean = false;
+  private logger: Log;
 
   constructor(parentNode: HTMLElement) {
     this.parentNode = parentNode;
@@ -18,6 +20,8 @@ export default class ColorDial {
     this.dialDomsPackage = colorDialTemplate();
 
     this.colorConversion = new ColorConversion();
+
+    this.logger = new Log();
   }
 
   // -----------------------------------------------------------------------------------------
@@ -31,6 +35,8 @@ export default class ColorDial {
     this.attachInputEvents();
 
     this.appendSelfToParentNode();
+
+    this.logger.info("color dial init successfully");
   }
 
   /**

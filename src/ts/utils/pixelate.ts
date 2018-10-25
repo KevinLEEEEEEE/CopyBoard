@@ -1,15 +1,12 @@
 import * as workerPath from "file-loader?name=[name].js!./pixelate.worker";
+import Log from "./log/log";
 
 export default class Pixelate {
   private readonly imageData;
-  private readonly width: number;
-  private readonly height: number;
   private readonly pixelateWorker: Worker;
 
   constructor(imageData) {
     this.imageData = imageData;
-    this.width = imageData.width;
-    this.height = imageData.height;
     this.pixelateWorker = new Worker(workerPath);
   }
 
@@ -19,17 +16,17 @@ export default class Pixelate {
    * @param pixelBlockHeight
    */
   public getPixelatedImageData(pixelBlockWidth: number = 1, pixelBlockHeight: number = 1): Promise<ImageData> {
-
     const data = {
       imageData: this.imageData,
-      width: this.width,
-      height: this.height,
       pixelBlockWidth,
       pixelBlockHeight,
     };
+    const logger  = new Log();
 
     return new Promise((resolve, reject) => {
       this.pixelateWorker.addEventListener("message", (message) => {
+        logger.info("run pixelate process successfully");
+
         resolve(message.data.imageData);
       });
 
@@ -38,6 +35,11 @@ export default class Pixelate {
       });
 
       this.pixelateWorker.postMessage(data);
+    })
+    .catch((err) => {
+      logger.error("error with pixelate process, return original imageData", err);
+
+      return this.imageData;
     });
   }
 }
