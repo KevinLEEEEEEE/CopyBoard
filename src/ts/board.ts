@@ -105,4 +105,8 @@ export default class Board {
   public drawImage(image: HTMLImageElement, x: number, y: number, width: number, height: number): void {
     this.ctx.drawImage(image, x, y, width, height);
   }
+
+  public drawImageData(imageData: ImageData) {
+    this.ctx.putImageData(imageData, 0, 0);
+  }
 }

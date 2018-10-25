@@ -9,7 +9,8 @@
       "es2015.promise",
       "es6",
       "es7",
-      "dom"
+      "dom",
+      "webworker"
     ]
   },
   "exclude": [

@@ -67,12 +67,6 @@ export default class ReferenceBoard extends Board {
     this.removeSelfFromParentNode();
   }
 
-  private initPixelatedUtils() {
-    const imageData = this.getImageData();
-
-    this.pixelateInstance = new Pixelate(imageData);
-  }
-
   private convertBase64ToImage(base64: string): Promise<HTMLImageElement> {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -115,6 +109,12 @@ export default class ReferenceBoard extends Board {
     this.setStyleWidth(width);
 
     this.setStyleHeight(height);
+  }
+
+  private initPixelatedUtils() {
+    const imageData = this.getImageData();
+
+    this.pixelateInstance = new Pixelate(imageData);
   }
 
   private appendSelfToParentNode(): void {
@@ -222,6 +222,13 @@ export default class ReferenceBoard extends Board {
     this.updateNodePosition(this.refDomsPackage.referenceBoard, x, y);
   }
 
+   private updateNodePosition(node: HTMLElement, x: number, y: number): void {
+    window.requestAnimationFrame(() => {
+      node.style.left = x + "px";
+      node.style.top = y + "px";
+    });
+  }
+
   private mousemoveForScale(e): void {
     const scaleRatio = this.getScaleRatio(this.clickPagePos[0], e.pageX);
 
@@ -247,13 +254,6 @@ export default class ReferenceBoard extends Board {
 
   private moveSelfBackFromTopLayer(): void {
     this.refDomsPackage.referenceBoard.classList.remove("tmpTopLayer");
-  }
-
-  private updateNodePosition(node: HTMLElement, x: number, y: number): void {
-    window.requestAnimationFrame(() => {
-      node.style.left = x + "px";
-      node.style.top = y + "px";
-    });
   }
 
   // -----------------------------------------------------------------------------------------
@@ -361,6 +361,11 @@ export default class ReferenceBoard extends Board {
   }
 
   private pixelate = () => {
-    this.pixelateInstance.getPixelatedImageData(3);
+    this.pixelateInstance.getPixelatedImageData(4, 4)
+    .then((imageData) => {
+      this.drawImageData(imageData);
+    });
+
+    // this.drawImageData(ig);
   }
 }

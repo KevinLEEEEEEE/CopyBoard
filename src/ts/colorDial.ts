@@ -44,8 +44,6 @@ export default class ColorDial {
     this.removeSelfFromParentNode();
   }
 
-  // -----------------------------------------------------------------------------------------
-
   /**
    * get current color in an array like [r, g, a]
    */
