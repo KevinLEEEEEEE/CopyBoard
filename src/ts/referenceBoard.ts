@@ -56,7 +56,9 @@ export default class ReferenceBoard extends Board {
 
         this.logger.info("reference board init successfully");
       }, (err) => {
-        this.logger.error("fail to convert base64 to image");
+        this.delete();
+
+        this.logger.error("fail to convert base64 to image", err);
       });
   }
 

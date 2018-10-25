@@ -25,7 +25,10 @@
   height: 35px;
   padding: 0;
   border: transparent;
+  background-size: 60%;
   background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
   font-size: .6rem;
   color: white;
 }
@@ -53,4 +56,40 @@
 
 .tmpTopLayer .boardContent {
   opacity: .9;
+}
+
+.opacity {
+  background-image: url('../image//icons//display.png');
+}
+
+.moveUp {
+  background-image: url('../image//icons//moveup.png');
+}
+
+.moveTop {
+  background-image: url('../image//icons//movetop.png');
+}
+
+.moveDown {
+  background-image: url('../image//icons//movedown.png');
+}
+
+.moveBottom {
+  background-image: url('../image//icons//movebottom.png');
+}
+
+.colorSelector {
+  background-image: url('../image//icons//colorSelector.png');
+}
+
+.pixelate {
+  background-image: url('../image//icons//pixelate.png');
+}
+
+.locker {
+  background-image: url('../image//icons//locker.png');
+}
+
+.delete {
+  background-image: url('../image//icons//delete.png');
 }
