@@ -1,7 +1,7 @@
 import Board from "./board";
+import Pixelate from "./cores/pixelate";
 import { IReferenceTemplate, referenceTemplate } from "./templates/referenceTemplate";
 import Log from "./utils/log/log";
-import Pixelate from "./utils/pixelate";
 
 const REFERENCE_CONTROLLER_HEIGHT = 70;
 const DEFAULT_SCALE_RATIO = 0.005;
@@ -16,6 +16,8 @@ export default class ReferenceBoard extends Board {
   private tmpBoardSize: number[] = [0, 0];
   private canMove: boolean = false;
   private canScale: boolean = false;
+  private isOpacityFocused: boolean = false;
+  private isLocked: boolean = false;
   private pixelateInstance: Pixelate;
   private logger: Log;
 
@@ -192,7 +194,7 @@ export default class ReferenceBoard extends Board {
   }
 
   private canAcceptMousedown(target: HTMLElement): boolean {
-    return this.refDomsPackage.cvsContainer.contains(target) && !this.islocked();
+    return this.refDomsPackage.cvsContainer.contains(target) && this.isLocked === false;
   }
 
   private updateMousePosition(e): void {
@@ -328,15 +330,23 @@ export default class ReferenceBoard extends Board {
 
   // -----------------------------------------------------------------------------------------
 
-  private attachSettingBtnEvents() {
-    const { deleteBtn, lockerBtn } = this.refDomsPackage;
+  private attachSettingBtnEvents(): void {
+    const { deleteBtn, lockerBtn, nameInput, opacityBtn, opacityInput } = this.refDomsPackage;
 
     deleteBtn.addEventListener("click", this.delete, true);
 
     lockerBtn.addEventListener("click", this.locker, true);
+
+    nameInput.addEventListener("change", this.nameChange, true);
+
+    opacityBtn.addEventListener("click", this.opacity, true);
+
+    opacityInput.addEventListener("blur", this.blur, true);
+
+    opacityInput.addEventListener("change", this.opacityChange, true);
   }
 
-  private removeSettingBtnEvents() {
+  private removeSettingBtnEvents(): void {
     const { deleteBtn, lockerBtn } = this.refDomsPackage;
 
     deleteBtn.removeEventListener("click", this.delete, true);
@@ -345,12 +355,90 @@ export default class ReferenceBoard extends Board {
   }
 
   private locker = (): void => {
-    this.islocked() === true ? this.unlock() : this.lock();
+    this.isLocked = !this.isLocked;
+
+    this.updateLockerIcon();
+  }
+
+  private updateLockerIcon(): void {
+    const { lockerBtn } = this.refDomsPackage;
+
+    if (this.isLocked === true) {
+      lockerBtn.classList.remove("unlock");
+      lockerBtn.classList.add("lock");
+    } else {
+      lockerBtn.classList.add("unlock");
+      lockerBtn.classList.remove("lock");
+    }
+  }
+
+  private nameChange = (e): void => {
+    const { value } = e.target;
+
+    this.setName(value);
+  }
+
+  private opacity = (): void => {
+    this.displayOpacityInputAndHideBtn();
+
+    this.isOpacityFocused = true;
+  }
+
+  private blur = (e): void => {
+    if (this.isOpacityFocused === true) {
+      this.opacityChange(e);
+    }
+  }
+
+  private opacityChange = (e): void => {
+    const { value } = e.target;
+    const opacity = parseInt(value, 10);
+
+    if (typeof opacity !== "number") {
+      throw new Error("please enter number");
+    }
+
+    this.changeOpacityOfContent(opacity);
+
+    this.displayBtnAndHideOpacityInput();
+
+    this.isOpacityFocused = false;
+  }
+
+  private changeOpacityOfContent(opacity: number): void {
+    if (opacity >= 100 && opacity <= 0) {
+      throw new Error("out of the range of opacity");
+    }
+
+    const { cvsContainer } = this.refDomsPackage;
+    const scaledOpacity = opacity / 100;
+
+    cvsContainer.style.opacity = scaledOpacity.toString();
+  }
+
+  private displayOpacityInputAndHideBtn(): void {
+    const { opacityBtn, opacityInput } = this.refDomsPackage;
+
+    opacityInput.classList.remove("noDisplay");
+
+    opacityBtn.classList.add("noDisplay");
+
+    opacityInput.focus();
+
+    opacityInput.select();
+  }
+
+  private displayBtnAndHideOpacityInput(): void {
+    const { opacityBtn, opacityInput } = this.refDomsPackage;
+
+    opacityInput.classList.add("noDisplay");
+
+    opacityBtn.classList.remove("noDisplay");
   }
 
   // -----------------------------------------------------------------------------------------
 
-  private attachToolsBtnEvebts() {
+  private attachToolsBtnEvebts(): void {
     const { colorPickerBtn, pixelateBtn } = this.refDomsPackage;
 
     colorPickerBtn.addEventListener("click", this.colorPicker, true);
@@ -358,7 +446,7 @@ export default class ReferenceBoard extends Board {
     pixelateBtn.addEventListener("click", this.pixelate, true);
   }
 
-  private removeToolsBtnEvebts() {
+  private removeToolsBtnEvebts(): void {
     const { colorPickerBtn, pixelateBtn } = this.refDomsPackage;
 
     colorPickerBtn.removeEventListener("click", this.colorPicker, true);
@@ -366,11 +454,11 @@ export default class ReferenceBoard extends Board {
     pixelateBtn.removeEventListener("click", this.pixelate, true);
   }
 
-  private colorPicker = () => {
+  private colorPicker = (): void => {
     this.logger.info("picker");
   }
 
-  private pixelate = () => {
+  private pixelate = (): void => {
     const pixelSize = 20;
 
     this.pixelateInstance.getPixelatedImageData(pixelSize, pixelSize)

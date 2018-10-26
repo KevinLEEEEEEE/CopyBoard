@@ -16,6 +16,7 @@
 }
 
 .controlPanel>div {
+  position: relative;
   display: flex;
   flex-direction: column-reverse;
 }
@@ -25,7 +26,7 @@
   height: 35px;
   padding: 0;
   border: transparent;
-  background-size: 60%;
+  background-size: 65%;
   background-color: transparent;
   background-repeat: no-repeat;
   background-position: center;
@@ -35,6 +36,32 @@
 
 .controlPanel>div button:not(:first-child) {
   visibility: hidden;
+}
+
+.nameInput {
+  width: 60px;
+  height: 35px;;
+  border: transparent;
+  background: transparent;
+  overflow: hidden;
+  color: white;
+}
+
+.opacityInput {
+  position: absolute;
+  width: 35px;
+  height: 35px;
+  border: transparent;
+  outline: transparent;
+  background: transparent;
+  box-shadow: transparent;
+  text-align: center;
+  color: white;
+  -moz-appearance: textfield !important;
+}
+
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
 }
 
 .rightPanel>div:hover button {
@@ -50,16 +77,21 @@
   pointer-events: initial;
 }
 
+.noDisplay {
+  display: none; 
+}
+
 .tmpTopLayer {
-  z-index: 1000;
+  z-index: 1000 !important;
 }
 
 .tmpTopLayer .boardContent {
-  opacity: .9;
+  opacity: .9 !important;
 }
 
 .opacity {
   background-image: url('../image//icons//display.png');
+  background-size: 80% !important;
 }
 
 .moveUp {
@@ -86,10 +118,15 @@
   background-image: url('../image//icons//pixelate.png');
 }
 
-.locker {
-  background-image: url('../image//icons//locker.png');
+.lock {
+  background-image: url('../image//icons//lock.png');
+}
+
+.unlock {
+  background-image: url('../image//icons//unlock.png');
 }
 
 .delete {
   background-image: url('../image//icons//delete.png');
 }
+

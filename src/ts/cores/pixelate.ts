@@ -1,5 +1,5 @@
 import * as workerPath from "file-loader?name=[name].js!./pixelate.worker";
-import Log from "./log/log";
+import Log from "../utils/log/log";
 
 export default class Pixelate {
   private readonly imageData;

@@ -3,8 +3,6 @@ export default class Board {
   private readonly canvas: HTMLCanvasElement;
   private readonly ctx: CanvasRenderingContext2D;
   private name: string;
-  private opacity: number = 1;
-  private locked: boolean = false;
   private width: number = 0;
   private height: number = 0;
   private cssWidth: number = 0;
@@ -38,10 +36,6 @@ export default class Board {
 
   public getStyleHeight(): number {
     return this.cssHeight;
-  }
-
-  public getOpacity(): number {
-    return this.opacity;
   }
 
   public getImageData(): ImageData {
@@ -78,26 +72,8 @@ export default class Board {
     this.canvas.style.height = height + "px";
   }
 
-  public setOpacity(opacity: number) {
-    this.opacity = opacity;
-  }
-
   public setCanvasParentNode(parentNode: HTMLElement): void {
       parentNode.appendChild(this.canvas);
-  }
-
-  // -----------------------------------------------------------------------------------------
-
-  public lock(): void {
-    this.locked = true;
-  }
-
-  public unlock(): void {
-    this.locked = false;
-  }
-
-  public islocked(): boolean {
-    return this.locked;
   }
 
   // -----------------------------------------------------------------------------------------

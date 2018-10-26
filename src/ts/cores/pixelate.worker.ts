@@ -1,7 +1,7 @@
 const SIZEOF_RGBA = 4; // [r, g, b, a]
 
 class PixelBlock {
-  private readonly imageData: ImageData;
+  public readonly imageData: ImageData;
   private readonly pixelBlockWidth: number;
   private readonly pixelBlockHeight: number;
   private readonly blockAmountInXDir: number;
@@ -19,20 +19,12 @@ class PixelBlock {
     this.blockAmountInYDir = this.getBlockAmountInYDir();
   }
 
-  public getImageData(): ImageData {
-    return this.imageData;
-  }
-
-  /**
-   * the amount of pixel block splitted from imageData
-   */
+  // the amount of pixel block splitted from imageData
   public getPixelBlockAmount(): number {
     return this.blockAmountInXDir * this.blockAmountInYDir;
   }
 
-  /**
-   * the real pixel amount in single pixel block
-   */
+  // the real pixel amount in single pixel block
   public getPixelBlockSize(): number {
     return this.pixelBlockWidth * this.pixelBlockHeight;
   }
@@ -46,7 +38,7 @@ class PixelBlock {
     return [overallX, overallY];
   }
 
-  public getRGBInPoint(x: number, y: number) {
+  public getRGBInPoint(x: number, y: number): number[] {
     if (x >= this.width || y >= this.height) {
       return [];
     }
@@ -72,16 +64,6 @@ class PixelBlock {
     data[indexInImageData + 2] = rgb[2];
   }
 
-  public computeAverageColorData(piexlatedData: number[]): number[] {
-    const combinedData = piexlatedData.reduce((prev, current) => {
-      return prev.map((prevValue, index) => prevValue + current[index]);
-    }, [0, 0, 0]);
-
-    const averagedData = combinedData.map((data) => data / piexlatedData.length);
-
-    return averagedData;
-  }
-
   private getBlockAmountInXDir(): number {
     return Math.ceil(this.width / this.pixelBlockWidth);
   }
@@ -98,6 +80,36 @@ class PixelBlock {
   }
 }
 
+const isArrayEqual = (array1: any[], array2: any[]): boolean => {
+  if (array1.length !== array2.length) {
+    return false;
+  }
+
+  for (let i = 0, j = array1.length; i < j; i += 1) {
+    if (array1[i] instanceof Array && array2[i] instanceof Array) {
+      if (!array1[i].equals(array2[i])) {
+        return false;
+      }
+    }
+
+    if (array1[i] !== array2[i]) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+const computeArrayAverage = (array: number[]): number[] => {
+  const combinedArray = array.reduce((prev, current) => {
+    return prev.map((prevValue, index) => prevValue + current[index]);
+  }, [0, 0, 0]);
+
+  const averageArray = combinedArray.map((data) => data / array.length);
+
+  return averageArray;
+};
+
 onmessage = (event) => {
   const pixelBlock = new PixelBlock(event.data);
   const pixelBlockAmount = pixelBlock.getPixelBlockAmount();
@@ -111,13 +123,13 @@ onmessage = (event) => {
       const [x, y] = pixelBlock.getPointByBlockIndex(indexOfBlock, indexInBlock);
       const rgb = pixelBlock.getRGBInPoint(x, y);
 
-      if (rgb !== []) {
+      if (!isArrayEqual(rgb, [])) {
         colorDataInPixelBlock.push(rgb);
         pointsInPixelBlock.push([x, y]);
       }
     }
 
-    const combinedColorData = pixelBlock.computeAverageColorData(colorDataInPixelBlock);
+    const combinedColorData = computeArrayAverage(colorDataInPixelBlock);
 
     pointsInPixelBlock.forEach((point) => {
       pixelBlock.setRGBInPoint(point[0], point[1], combinedColorData);
@@ -125,6 +137,6 @@ onmessage = (event) => {
   }
 
   postMessage({
-    imageData: pixelBlock.getImageData(),
+    imageData: pixelBlock.imageData,
   });
 };

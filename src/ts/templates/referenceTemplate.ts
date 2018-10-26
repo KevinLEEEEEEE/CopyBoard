@@ -5,6 +5,7 @@ interface IReferenceTemplate {
   cvsContainer: HTMLDivElement;
   nameInput: HTMLInputElement;
   opacityBtn: HTMLButtonElement;
+  opacityInput: HTMLInputElement;
   moveUpBtn: HTMLButtonElement;
   moveTopBtn: HTMLButtonElement;
   moveDownBtn: HTMLButtonElement;
@@ -26,13 +27,18 @@ const referenceTemplate = (): IReferenceTemplate => {
   const rightPanel: HTMLDivElement = createAndAppend<HTMLDivElement>(controller, "div", "controlPanel", "rightPanel");
 
   const div1: HTMLDivElement = createAndAppend<HTMLDivElement>(leftPanel, "div");
-  const nameInput: HTMLInputElement = createAndAppend<HTMLInputElement>(div1, "input");
+  const nameInput: HTMLInputElement = createAndAppend<HTMLInputElement>(div1, "input", "nameInput");
 
   nameInput.setAttribute("type", "text");
   nameInput.setAttribute("placeholder", "name");
 
   const div2: HTMLDivElement = createAndAppend<HTMLDivElement>(leftPanel, "div");
   const opacityBtn: HTMLButtonElement = createAndAppend<HTMLButtonElement>(div2, "button", "opacity");
+  const opacityInput: HTMLInputElement = createAndAppend<HTMLInputElement>(div2, "input", "opacityInput", "noDisplay");
+
+  opacityInput.setAttribute("type", "number");
+  opacityInput.setAttribute("min", "0");
+  opacityInput.setAttribute("max", "100");
 
   const div3: HTMLDivElement = createAndAppend<HTMLDivElement>(rightPanel, "div");
   const moveUpBtn: HTMLButtonElement = createAndAppend<HTMLButtonElement>(div3, "button", "moveUp");
@@ -47,7 +53,7 @@ const referenceTemplate = (): IReferenceTemplate => {
   const pixelateBtn: HTMLButtonElement = createAndAppend<HTMLButtonElement>(div5, "button", "pixelate");
 
   const div6: HTMLDivElement = createAndAppend<HTMLDivElement>(rightPanel, "div");
-  const lockerBtn: HTMLButtonElement = createAndAppend<HTMLButtonElement>(div6, "button", "locker");
+  const lockerBtn: HTMLButtonElement = createAndAppend<HTMLButtonElement>(div6, "button", "locke");
   const deleteBtn: HTMLButtonElement = createAndAppend<HTMLButtonElement>(div6, "button", "delete");
 
   return {
@@ -55,6 +61,7 @@ const referenceTemplate = (): IReferenceTemplate => {
     cvsContainer,
     nameInput,
     opacityBtn,
+    opacityInput,
     moveUpBtn,
     moveTopBtn,
     moveDownBtn,
