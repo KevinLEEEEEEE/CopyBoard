@@ -14,10 +14,12 @@ export default class ReferenceBoard extends Board {
   private clickOffsetPos: number[] = [0, 0];
   private clickPagePos: number[] = [0, 0];
   private tmpBoardSize: number[] = [0, 0];
+  private isOpacityFocused: boolean = false;
+  private isPixelateFocused: boolean = false;
+  private isColorPickerFocused: boolean = false;
+  private isLocked: boolean = false;
   private canMove: boolean = false;
   private canScale: boolean = false;
-  private isOpacityFocused: boolean = false;
-  private isLocked: boolean = false;
   private pixelateInstance: Pixelate;
   private logger: Log;
 
@@ -341,7 +343,7 @@ export default class ReferenceBoard extends Board {
 
     opacityBtn.addEventListener("click", this.opacity, true);
 
-    opacityInput.addEventListener("blur", this.blur, true);
+    opacityInput.addEventListener("blur", this.opacityBlur, true);
 
     opacityInput.addEventListener("change", this.opacityChange, true);
   }
@@ -384,9 +386,13 @@ export default class ReferenceBoard extends Board {
     this.isOpacityFocused = true;
   }
 
-  private blur = (e): void => {
+  private opacityBlur = (e): void => {
     if (this.isOpacityFocused === true) {
-      this.opacityChange(e);
+      try {
+        this.opacityChange(e);
+      } catch (e) {
+        this.logger.error(e);
+      }
     }
   }
 
@@ -398,11 +404,15 @@ export default class ReferenceBoard extends Board {
       throw new Error("please enter number");
     }
 
-    this.changeOpacityOfContent(opacity);
+    try {
+      this.changeOpacityOfContent(opacity);
+    } catch (e) {
+      throw e;
+    } finally {
+     this.displayBtnAndHideOpacityInput();
 
-    this.displayBtnAndHideOpacityInput();
-
-    this.isOpacityFocused = false;
+     this.isOpacityFocused = false;
+    }
   }
 
   private changeOpacityOfContent(opacity: number): void {
@@ -439,31 +449,113 @@ export default class ReferenceBoard extends Board {
   // -----------------------------------------------------------------------------------------
 
   private attachToolsBtnEvebts(): void {
-    const { colorPickerBtn, pixelateBtn } = this.refDomsPackage;
+    const { cvsContainer, colorPickerBtn, pixelateBtn, pixelateInput } = this.refDomsPackage;
 
     colorPickerBtn.addEventListener("click", this.colorPicker, true);
 
+    cvsContainer.addEventListener("mousedown", this.pickColor, true);
+
     pixelateBtn.addEventListener("click", this.pixelate, true);
+
+    pixelateInput.addEventListener("blur", this.pixelateBlur, true);
+
+    pixelateInput.addEventListener("change", this.pixelateChange, true);
   }
 
   private removeToolsBtnEvebts(): void {
-    const { colorPickerBtn, pixelateBtn } = this.refDomsPackage;
+    const { colorPickerBtn, pixelateBtn, pixelateInput } = this.refDomsPackage;
 
     colorPickerBtn.removeEventListener("click", this.colorPicker, true);
 
     pixelateBtn.removeEventListener("click", this.pixelate, true);
+
+    pixelateInput.removeEventListener("blur", this.pixelateBlur, true);
+
+    pixelateInput.removeEventListener("change", this.pixelateChange, true);
   }
 
   private colorPicker = (): void => {
     this.logger.info("picker");
+
+    this.isColorPickerFocused = true;
+  }
+
+  private pickColor = (e): void => {
+    if (this.isColorPickerFocused === false) {
+      return;
+    }
+
+    const { offsetX, offsetY } = e;
+    const rgba = this.getColorAt(offsetX, offsetY);
+
+    this.logger.info(rgba.toString());
+
+    this.isColorPickerFocused = false;
   }
 
   private pixelate = (): void => {
-    const pixelSize = 20;
+    this.displayPixelateInputAndHideBtn();
+
+    this.isPixelateFocused = true;
+  }
+
+  private pixelateBlur = (e): void => {
+    if (this.isPixelateFocused === true) {
+      try {
+        this.pixelateChange(e);
+      } catch (e) {
+        this.logger.error(e);
+      }
+    }
+  }
+
+  private pixelateChange = (e): void => {
+    const { value } = e.target;
+    const pixelSize = parseInt(value, 10);
+
+    if (typeof pixelSize !== "number") {
+      throw new Error("please enter number");
+    }
+
+    try {
+      this.pixelateContentCanvas(pixelSize);
+    } catch (e) {
+      this.logger.error(e);
+    } finally {
+      this.displayBtnAndHidePixelateInput();
+
+      this.isPixelateFocused = false;
+    }
+  }
+
+  private pixelateContentCanvas(pixelSize: number): void {
+    if (pixelSize < 1 || pixelSize > this.getWidth() || pixelSize > this.getHeight()) {
+      throw new Error("out of the range of pixel size");
+    }
 
     this.pixelateInstance.getPixelatedImageData(pixelSize, pixelSize)
     .then((imageData) => {
       this.drawImageData(imageData);
     });
+  }
+
+  private displayPixelateInputAndHideBtn(): void {
+    const { pixelateBtn, pixelateInput } = this.refDomsPackage;
+
+    pixelateInput.classList.remove("noDisplay");
+
+    pixelateBtn.classList.add("noDisplay");
+
+    pixelateInput.focus();
+
+    pixelateInput.select();
+  }
+
+  private displayBtnAndHidePixelateInput(): void {
+    const { pixelateBtn, pixelateInput } = this.refDomsPackage;
+
+    pixelateInput.classList.add("noDisplay");
+
+    pixelateBtn.classList.remove("noDisplay");
   }
 }

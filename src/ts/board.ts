@@ -42,6 +42,14 @@ export default class Board {
     return this.ctx.getImageData(0, 0, this.width, this.height);
   }
 
+  public getColorAt(x: number, y: number): number[] {
+    const index = (y * this.width + x) * 4;
+    const imageData = this.getImageData();
+    const { data } = imageData;
+
+    return [data[index], data[index + 1], data[index + 2], data[index + 3]];
+  }
+
   // -----------------------------------------------------------------------------------------
 
   public setName(name: string): void {

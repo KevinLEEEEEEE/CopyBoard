@@ -12,6 +12,7 @@ interface IReferenceTemplate {
   moveBottomBtn: HTMLButtonElement;
   colorPickerBtn: HTMLButtonElement;
   pixelateBtn: HTMLButtonElement;
+  pixelateInput: HTMLInputElement;
   lockerBtn: HTMLButtonElement;
   deleteBtn: HTMLButtonElement;
 }
@@ -37,8 +38,6 @@ const referenceTemplate = (): IReferenceTemplate => {
   const opacityInput: HTMLInputElement = createAndAppend<HTMLInputElement>(div2, "input", "opacityInput", "noDisplay");
 
   opacityInput.setAttribute("type", "number");
-  opacityInput.setAttribute("min", "0");
-  opacityInput.setAttribute("max", "100");
 
   const div3: HTMLDivElement = createAndAppend<HTMLDivElement>(rightPanel, "div");
   const moveUpBtn: HTMLButtonElement = createAndAppend<HTMLButtonElement>(div3, "button", "moveUp");
@@ -51,9 +50,14 @@ const referenceTemplate = (): IReferenceTemplate => {
   const div5: HTMLDivElement = createAndAppend<HTMLDivElement>(rightPanel, "div");
   const colorPickerBtn: HTMLButtonElement = createAndAppend<HTMLButtonElement>(div5, "button", "colorSelector");
   const pixelateBtn: HTMLButtonElement = createAndAppend<HTMLButtonElement>(div5, "button", "pixelate");
+  const pixelateInput: HTMLInputElement =
+  createAndAppend<HTMLInputElement>(div5, "input", "pixelateInput", "noDisplay");
+
+  pixelateInput.setAttribute("type", "number");
+  pixelateInput.setAttribute("placeholder", "1");
 
   const div6: HTMLDivElement = createAndAppend<HTMLDivElement>(rightPanel, "div");
-  const lockerBtn: HTMLButtonElement = createAndAppend<HTMLButtonElement>(div6, "button", "locke");
+  const lockerBtn: HTMLButtonElement = createAndAppend<HTMLButtonElement>(div6, "button", "locke", "unlock");
   const deleteBtn: HTMLButtonElement = createAndAppend<HTMLButtonElement>(div6, "button", "delete");
 
   return {
@@ -68,6 +72,7 @@ const referenceTemplate = (): IReferenceTemplate => {
     moveBottomBtn,
     colorPickerBtn,
     pixelateBtn,
+    pixelateInput,
     lockerBtn,
     deleteBtn,
   };
