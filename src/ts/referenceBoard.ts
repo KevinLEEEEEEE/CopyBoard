@@ -7,6 +7,12 @@ const REFERENCE_CONTROLLER_HEIGHT = 70;
 const DEFAULT_SCALE_RATIO = 0.005;
 const WIDTH_LIMITAION_RATIO = 3;
 const MIN_BOARD_WIDTH = 300;
+const enum STATE {
+  default,
+  move,
+  scale,
+  locked,
+}
 
 export default class ReferenceBoard extends Board {
   private readonly refDomsPackage: IReferenceTemplate;
@@ -17,11 +23,9 @@ export default class ReferenceBoard extends Board {
   private isOpacityFocused: boolean = false;
   private isPixelateFocused: boolean = false;
   private isColorPickerFocused: boolean = false;
-  private isLocked: boolean = false;
-  private canMove: boolean = false;
-  private canScale: boolean = false;
   private pixelateInstance: Pixelate;
   private logger: Log;
+  private state: STATE;
 
   constructor(name: string, parentNode: HTMLElement) {
     super(name);
@@ -30,10 +34,10 @@ export default class ReferenceBoard extends Board {
 
     this.refDomsPackage = referenceTemplate();
 
+    this.state = STATE.default;
+
     this.logger = new Log();
   }
-
-  // -----------------------------------------------------------------------------------------
 
   /**
    * run after instance to attach events and add self to don tree
@@ -178,25 +182,31 @@ export default class ReferenceBoard extends Board {
 
     this.updateMouseState(e);
 
-    this.moveSelfToTopLayer();
+    this.updateLayerIndex();
   }
 
   private mousemove = (e): void => {
-    if (this.canMove === true) {
+    this.logger.info(this.state.toString());
+    switch (this.state) {
+      case STATE.move:
       this.mousemoveForMove(e);
-    } else if (this.canScale === true) {
+      break;
+      case STATE.scale:
       this.mousemoveForScale(e);
+      break;
+      default:
     }
   }
 
   private mouseup = (): void => {
     this.restoreMouseState();
 
-    this.moveSelfBackFromTopLayer();
+    this.updateLayerIndex();
   }
 
   private canAcceptMousedown(target: HTMLElement): boolean {
-    return this.refDomsPackage.cvsContainer.contains(target) && this.isLocked === false;
+    return this.refDomsPackage.cvsContainer.contains(target) && this.state === STATE.default
+    && this.isColorPickerFocused === false;
   }
 
   private updateMousePosition(e): void {
@@ -216,15 +226,30 @@ export default class ReferenceBoard extends Board {
   // move mouse with 'ctrl' key pressed means to scale the image
   private updateMouseState(e): void {
     if (e.ctrlKey === true) {
-      this.canScale = true;
+      this.state = STATE.scale;
     } else {
-      this.canMove = true;
+      this.state = STATE.move;
+    }
+  }
+
+  private updateLayerIndex(): void {
+    switch (this.state) {
+      case STATE.default:
+      case STATE.locked:
+      this.refDomsPackage.referenceBoard.classList.remove("tmpTopLayer");
+      break;
+      case STATE.move:
+      case STATE.scale:
+      this.refDomsPackage.referenceBoard.classList.add("tmpTopLayer");
+      break;
+      default:
     }
   }
 
   private restoreMouseState(): void {
-    this.canMove = false;
-    this.canScale = false;
+    if (this.state === STATE.move || this.state === STATE.scale) {
+      this.state = STATE.default;
+    }
   }
 
   private mousemoveForMove(e): void {
@@ -260,14 +285,6 @@ export default class ReferenceBoard extends Board {
     const scaleRatio = moveDistance * DEFAULT_SCALE_RATIO + 1;
 
     return scaleRatio;
-  }
-
-  private moveSelfToTopLayer(): void {
-    this.refDomsPackage.referenceBoard.classList.add("tmpTopLayer");
-  }
-
-  private moveSelfBackFromTopLayer(): void {
-    this.refDomsPackage.referenceBoard.classList.remove("tmpTopLayer");
   }
 
   // -----------------------------------------------------------------------------------------
@@ -357,7 +374,11 @@ export default class ReferenceBoard extends Board {
   }
 
   private locker = (): void => {
-    this.isLocked = !this.isLocked;
+    if (this.state !== STATE.locked) {
+      this.state = STATE.locked;
+    } else {
+      this.state = STATE.default;
+    }
 
     this.updateLockerIcon();
   }
@@ -365,7 +386,7 @@ export default class ReferenceBoard extends Board {
   private updateLockerIcon(): void {
     const { lockerBtn } = this.refDomsPackage;
 
-    if (this.isLocked === true) {
+    if (this.state === STATE.locked) {
       lockerBtn.classList.remove("unlock");
       lockerBtn.classList.add("lock");
     } else {
@@ -463,9 +484,11 @@ export default class ReferenceBoard extends Board {
   }
 
   private removeToolsBtnEvebts(): void {
-    const { colorPickerBtn, pixelateBtn, pixelateInput } = this.refDomsPackage;
+    const { cvsContainer, colorPickerBtn, pixelateBtn, pixelateInput } = this.refDomsPackage;
 
     colorPickerBtn.removeEventListener("click", this.colorPicker, true);
+
+    cvsContainer.removeEventListener("mousedown", this.pickColor, true);
 
     pixelateBtn.removeEventListener("click", this.pixelate, true);
 
@@ -475,9 +498,9 @@ export default class ReferenceBoard extends Board {
   }
 
   private colorPicker = (): void => {
-    this.logger.info("picker");
-
     this.isColorPickerFocused = true;
+
+    this.changeCursorIcon();
   }
 
   private pickColor = (e): void => {
@@ -491,6 +514,18 @@ export default class ReferenceBoard extends Board {
     this.logger.info(rgba.toString());
 
     this.isColorPickerFocused = false;
+
+    this.changeCursorIcon();
+  }
+
+  private changeCursorIcon(): void {
+    const { cvsContainer } = this.refDomsPackage;
+
+    if (this.isColorPickerFocused === true) {
+      cvsContainer.classList.add("cursorCrossHair");
+    } else {
+      cvsContainer.classList.remove("cursorCrossHair");
+    }
   }
 
   private pixelate = (): void => {

@@ -135,3 +135,7 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
   background-image: url('../image//icons//delete.png');
 }
 
+.cursorCrossHair {
+  cursor: crosshair !important;
+}
+
