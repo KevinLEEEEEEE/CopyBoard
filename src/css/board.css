@@ -30,8 +30,6 @@
   background-color: transparent;
   background-repeat: no-repeat;
   background-position: center;
-  font-size: .6rem;
-  color: white;
 }
 
 .controlPanel>div button:not(:first-child) {
@@ -96,6 +94,11 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
 
 .opacity {
   background-image: url('../image//icons//display.png');
+  background-size: 80% !important;
+}
+
+.opacityZero {
+  background-image: url('../image/icons/noDisplay.png') !important;
   background-size: 80% !important;
 }
 

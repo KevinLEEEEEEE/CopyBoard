@@ -7,6 +7,7 @@ const REFERENCE_CONTROLLER_HEIGHT = 70;
 const DEFAULT_SCALE_RATIO = 0.005;
 const WIDTH_LIMITAION_RATIO = 3;
 const MIN_BOARD_WIDTH = 300;
+const OPACITY_RATIO = 0.6;
 const enum STATE {
   default,
   move,
@@ -50,7 +51,7 @@ export default class ReferenceBoard extends Board {
 
     this.attachSettingBtnEvents();
 
-    this.attachToolsBtnEvebts();
+    this.attachToolsBtnEvents();
 
     this.convertBase64ToImage(base64)
       .then((img) => {
@@ -80,7 +81,7 @@ export default class ReferenceBoard extends Board {
 
     this.removeSettingBtnEvents();
 
-    this.removeToolsBtnEvebts();
+    this.removeToolsBtnEvents();
 
     this.removeSelfFromParentNode();
   }
@@ -425,26 +426,37 @@ export default class ReferenceBoard extends Board {
       throw new Error("please enter number");
     }
 
-    try {
-      this.changeOpacityOfContent(opacity);
-    } catch (e) {
-      throw e;
-    } finally {
-     this.displayBtnAndHideOpacityInput();
-
-     this.isOpacityFocused = false;
-    }
-  }
-
-  private changeOpacityOfContent(opacity: number): void {
     if (opacity >= 100 && opacity <= 0) {
       throw new Error("out of the range of opacity");
     }
 
+    this.changeOpacityOfContent(opacity);
+
+    this.changeOpacityOfIcon(opacity);
+
+    this.displayBtnAndHideOpacityInput();
+
+    this.isOpacityFocused = false;
+  }
+
+  private changeOpacityOfContent(opacity: number): void {
     const { cvsContainer } = this.refDomsPackage;
     const scaledOpacity = opacity / 100;
 
     cvsContainer.style.opacity = scaledOpacity.toString();
+  }
+
+  private changeOpacityOfIcon(opacity: number): void {
+    const { opacityBtn } = this.refDomsPackage;
+    const iconOpacity =  (100 - (100 - opacity) * OPACITY_RATIO) / 100;
+
+    if (opacity === 0) {
+      opacityBtn.classList.add("opacityZero");
+    } else {
+      opacityBtn.classList.remove("opacityZero");
+    }
+
+    opacityBtn.style.opacity = iconOpacity.toString();
   }
 
   private displayOpacityInputAndHideBtn(): void {
@@ -469,7 +481,7 @@ export default class ReferenceBoard extends Board {
 
   // -----------------------------------------------------------------------------------------
 
-  private attachToolsBtnEvebts(): void {
+  private attachToolsBtnEvents(): void {
     const { cvsContainer, colorPickerBtn, pixelateBtn, pixelateInput } = this.refDomsPackage;
 
     colorPickerBtn.addEventListener("click", this.colorPicker, true);
@@ -483,7 +495,7 @@ export default class ReferenceBoard extends Board {
     pixelateInput.addEventListener("change", this.pixelateChange, true);
   }
 
-  private removeToolsBtnEvebts(): void {
+  private removeToolsBtnEvents(): void {
     const { cvsContainer, colorPickerBtn, pixelateBtn, pixelateInput } = this.refDomsPackage;
 
     colorPickerBtn.removeEventListener("click", this.colorPicker, true);
@@ -552,22 +564,18 @@ export default class ReferenceBoard extends Board {
       throw new Error("please enter number");
     }
 
-    try {
-      this.pixelateContentCanvas(pixelSize);
-    } catch (e) {
-      this.logger.error(e);
-    } finally {
-      this.displayBtnAndHidePixelateInput();
-
-      this.isPixelateFocused = false;
-    }
-  }
-
-  private pixelateContentCanvas(pixelSize: number): void {
     if (pixelSize < 1 || pixelSize > this.getWidth() || pixelSize > this.getHeight()) {
       throw new Error("out of the range of pixel size");
     }
 
+    this.pixelateContentCanvas(pixelSize);
+
+    this.displayBtnAndHidePixelateInput();
+
+    this.isPixelateFocused = false;
+  }
+
+  private pixelateContentCanvas(pixelSize: number): void {
     this.pixelateInstance.getPixelatedImageData(pixelSize, pixelSize)
     .then((imageData) => {
       this.drawImageData(imageData);

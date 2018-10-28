@@ -1,0 +1,136 @@
+.output {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, .3);
+}
+
+.outputPanel {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 1100px;
+  height: 750px;
+  padding: 50px 90px;
+  border-radius: 50px;
+  background-color: rgb(245, 245, 245);
+}
+
+.outputPreview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 480px;
+  height: 480px;
+  border: 2px rgba(0, 0, 0, .6) dashed;
+  border-radius: 20px;
+}
+
+.outputCanvas {
+  width: 88%;
+  height: 88%;
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.outputComponents {
+  width: 50%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.outputComponents>div {
+  width: calc(100% + 20px);
+  height: 100%;
+  padding: 1.5rem 3rem;
+  box-sizing: border-box;
+  overflow-x: hidden; 
+  overflow-y: scroll;
+}
+
+.component {
+  width: 100%;
+  height: 200px;
+}
+
+.componentController {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  font-size: 0;
+}
+
+.componentController button {
+  width: 35px;
+  height: 35px;
+  padding: 0;
+  border: transparent;
+  background-size: 65%;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.componentController span {
+  line-height: 35px;
+  vertical-align: middle;
+  font-size: 1rem;
+}
+
+.componentContent {
+  margin-top: 1rem; 
+}
+
+.slider {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.sliderLimit {
+  font-size: .85rem;
+}
+
+.sliderController {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  width: 70%;
+  margin: 0 1rem;
+}
+
+.sliderLine {
+  width: 100%;
+  height: 2px;
+  border-radius: 1px;
+  background-color: rgb(50, 50, 50);
+}
+
+.sliderBar {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px rgb(50, 50, 50) solid;
+  border-radius: 20px;
+  background-color: rgb(245, 245, 245);
+  box-shadow: 0 0 0 2px rgb(245, 245, 245);
+}
+
+.opacityBlack {
+  background-image: url('../image//icons//displayBlack.png');
+  background-size: 80% !important;
+}
+
+.opacityBlackZero {
+  background-image: url('../image/icons/noDisplayBlack.png') !important;
+  background-size: 80% !important;
+}
+
+.deleteBlack {
+  background-image: url('../image//icons//deleteBlack.png');
+}
