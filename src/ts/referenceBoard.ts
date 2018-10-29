@@ -387,13 +387,16 @@ export default class ReferenceBoard extends Board {
   private updateLockerIcon(): void {
     const { lockerBtn } = this.refDomsPackage;
 
-    if (this.state === STATE.locked) {
-      lockerBtn.classList.remove("unlock");
-      lockerBtn.classList.add("lock");
-    } else {
-      lockerBtn.classList.add("unlock");
-      lockerBtn.classList.remove("lock");
-    }
+    // if (this.state === STATE.locked) {
+    //   lockerBtn.classList.remove("unlock");
+    //   lockerBtn.classList.add("lock");
+    // } else {
+    //   lockerBtn.classList.add("unlock");
+    //   lockerBtn.classList.remove("lock");
+    // }
+
+    lockerBtn.classList.toggle("unlock");
+    lockerBtn.classList.toggle("lock");
   }
 
   private nameChange = (e): void => {

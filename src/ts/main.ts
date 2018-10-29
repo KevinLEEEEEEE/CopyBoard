@@ -1,5 +1,6 @@
 import ColorDial from "./colorDial";
 import FileInput from "./fileInput";
+import OutputPanel from "./outputPanel";
 import ReferenceBoard from "./referenceBoard";
 
 export default class Main {
@@ -16,6 +17,10 @@ export default class Main {
     fileInput1.init();
 
     fileInput1.registerEvents(this.handleFile.bind(this));
+
+    const output = new OutputPanel();
+
+    output.init();
   }
 
   private handleFile(base64: string, name: string): void {
