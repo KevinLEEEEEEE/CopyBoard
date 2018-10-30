@@ -1,14 +1,21 @@
 import * as workerPath from "file-loader?name=[name].js!./lightnessData.worker";
-import { IDataCore } from "../domCore/component";
+import DataCore from "../domCore/component/dataCore";
+import { ILightnessParams } from "./paramsInterface/paramsInterface";
 
-export default class Pixelate implements IDataCore {
+const defaultParams: ILightnessParams = {
+  lightness: 0,
+};
+
+export default class Pixelate extends DataCore {
   private readonly lightnessWorker: Worker;
 
   constructor() {
+    super();
+
     this.lightnessWorker = new Worker(workerPath);
   }
 
-  public getComputedImageData(imageData: ImageData, params: object): Promise<ImageData> {
+  public getComputedImageData(imageData: ImageData, params: ILightnessParams = defaultParams): Promise<ImageData> {
     return new Promise((resolve, reject) => {
       this.lightnessWorker.addEventListener("message", (message) => {
         resolve(message.data);

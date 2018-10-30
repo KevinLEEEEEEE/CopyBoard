@@ -1,11 +1,5 @@
 export default class ContentEventEmitter {
-  private node: HTMLElement;
-
-  constructor(node: HTMLElement) {
-    this.node = node;
-  }
-
-  public emitChangeEvent(params: object): void {
+  public emitChangeEvent(node: HTMLElement, params: object): void {
     const eventDict = {
       detail: params,
       bubbles: true,
@@ -15,6 +9,6 @@ export default class ContentEventEmitter {
 
     const changeEvent = new CustomEvent("change", eventDict);
 
-    this.node.dispatchEvent(changeEvent);
+    node.dispatchEvent(changeEvent);
   }
 }

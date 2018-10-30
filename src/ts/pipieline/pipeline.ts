@@ -39,12 +39,6 @@ class Pipeline {
     this.imageData = imageData;
   }
 
-  // public run(imageData: ImageData): ImageData {
-  //   this.imageData = imageData;
-
-  //   this.runPipeline(imageData);
-  // }
-
   private attachPipeEvents(): void {
     this.parentNode.addEventListener("run", this.runEvent, true);
 
@@ -59,8 +53,6 @@ class Pipeline {
 
   private runEvent = () => {
     this.runPipeline(this.imageData);
-
-    this.imageData.data[0] = 0; // test only
   }
 
   private deleteEvent = (e: CustomEvent) => {
@@ -69,14 +61,10 @@ class Pipeline {
     this.readyToDelete.push(id);
 
     this.runPipeline(this.imageData);
-
-    this.imageData.data[0] = 0; // test only
   }
 
   private async runPipeline(imageData: ImageData): Promise<ImageData> {
     const defaultValue = Promise.resolve({ imageData, isChanged: false });
-
-    console.log("run");
 
     const outputData = await this.pipeFlow.reduce((prev, current) => {
       const { component } = this.pipeLut[current];
@@ -84,9 +72,15 @@ class Pipeline {
       return prev.then((value) => component.run(value));
     }, defaultValue);
 
-    console.log(outputData); // test only
-
     this.cleanDeletedComponents();
+
+    this.logger.info("output: " + outputData.imageData.data[0]);
+
+    const data = new Uint8ClampedArray([ //
+      0, 0, 0, 0, 1, 1, 1, 1,
+      2, 2, 2, 2, 3, 3, 3, 3,
+    ]);
+    this.imageData = new ImageData(data, 2, 2); //
 
     return outputData;
   }
@@ -111,7 +105,7 @@ class Pipeline {
 
     this.addComponentToPipe(type, id, component);
 
-    // this.runPipeline(this.imageData);
+    // flush after creation
   }
 
   private getID(type: pipelineType): symbol {

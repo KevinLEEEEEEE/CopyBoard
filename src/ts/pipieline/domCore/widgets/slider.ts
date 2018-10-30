@@ -1,4 +1,3 @@
-import Logger from "../../../utils/log/log";
 import { ISliderTemplate, sliderTemplate } from "./sliderTemplate";
 
 export default class Slider {
@@ -12,15 +11,12 @@ export default class Slider {
   private isChanged: boolean = false;
   private prevValue: number;
   private listeners: any[] = [];
-  private logger: Logger;
   private min: number;
   private max: number;
 
   constructor(min: number, max: number) {
     this.min = min;
     this.max = max;
-
-    this.logger = new Logger();
 
     this.sliderDomsPackage = sliderTemplate(min.toString(), max.toString());
 
@@ -36,7 +32,7 @@ export default class Slider {
   }
 
   private calculateValueAndNotify(): void {
-    if(this.isChanged === false) {
+    if (this.isChanged === false) {
       return;
     }
 
@@ -52,7 +48,7 @@ export default class Slider {
 
     this.listeners.forEach((listener) => {
       listener(value);
-    })
+    });
   }
 
   private attachSlideEvents = (): void => {

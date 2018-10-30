@@ -1,24 +1,19 @@
+import Logger from "../../../utils/log/log";
+import { ILightnessParams, ISaturationParams } from "../../dataCore/paramsInterface/paramsInterface";
+import PipeEventEmitter from "../utils/pipeEventEmitter";
 import { componentTemplate, IComponentTemplate } from "./componentTemplate";
-import PipeEventEmitter from "./pipeEventEmitter";
-import Logger from "../../utils/log/log";
+import DataCore from "./dataCore";
+import DomCore from "./domCore";
 
 interface IComponentParams {
   imageData: ImageData;
   isChanged: boolean;
 }
 
-interface IDataCore {
-  getComputedImageData(imageData: ImageData, params: object): Promise<ImageData>;
-}
-
-interface IDomCore {
-  getContentContainer(): HTMLElement;
-}
-
 abstract class Component {
   private componentDomsPackage: IComponentTemplate;
-  private domCore: IDomCore;
-  private dataCore: IDataCore;
+  private domCore: DomCore;
+  private dataCore: DataCore;
   private parentNode: HTMLElement;
   private id: symbol;
   private isVisible: boolean = true;
@@ -26,7 +21,7 @@ abstract class Component {
   private isChanged: boolean = false;
   private pipeEventEmitter: PipeEventEmitter;
   private localImageData: ImageData = null;
-  private params: object = { lightness: 0 };
+  private params: ILightnessParams | ISaturationParams;
   private logger: Logger;
 
   constructor(id: symbol, name: string, parentNode: HTMLElement) {
@@ -41,7 +36,7 @@ abstract class Component {
     this.pipeEventEmitter = new PipeEventEmitter(this.componentDomsPackage.component, this.id);
   }
 
-  public init(dataCore: IDataCore, domCore: IDomCore): void {
+  public init(dataCore: DataCore, domCore: DomCore): void {
     this.dataCore = dataCore;
 
     this.domCore = domCore;
@@ -57,6 +52,9 @@ abstract class Component {
 
   public async run({ imageData, isChanged }: IComponentParams): Promise<IComponentParams> {
     const changed = isChanged || this.isChanged;
+
+    this.logger.info("params: ");
+    console.log(this.params);
 
     if (this.localImageData === null) {
       this.logger.info("init, set default imageData");
@@ -87,9 +85,6 @@ abstract class Component {
 
       return Promise.resolve({ imageData: this.localImageData, isChanged: false });
     }
-
-    console.log(this.params);
-    console.log(imageData);
 
     const computedImageData = await this.dataCore.getComputedImageData(imageData, this.params)
       .then((data) => {
@@ -179,7 +174,7 @@ abstract class Component {
 
   private change = (e: CustomEvent): void => {
     e.stopPropagation();
-    
+
     this.params = e.detail;
 
     this.isChanged = true;
@@ -188,9 +183,4 @@ abstract class Component {
   }
 }
 
-export {
-  Component,
-  IComponentParams,
-  IDataCore,
-  IDomCore,
-};
+export default Component;

@@ -1,5 +1,5 @@
 import LightnessData from "./dataCore/lightnessData";
-import { Component } from "./domCore/component";
+import Component from "./domCore/component/component";
 import LightnessDom from "./domCore/lightnessDom";
 
 export default class Lightness extends Component {
