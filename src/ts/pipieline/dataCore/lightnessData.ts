@@ -1,6 +1,7 @@
 import * as workerPath from "file-loader?name=[name].js!./lightnessData.worker";
+import { IDataCore } from "../domCore/component";
 
-export default class Pixelate {
+export default class Pixelate implements IDataCore {
   private readonly lightnessWorker: Worker;
 
   constructor() {

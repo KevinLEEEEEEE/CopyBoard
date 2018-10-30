@@ -27,7 +27,8 @@ class Pipeline {
     this.createAndAppendComponent(); // for test only
     this.createAndAppendComponent(); // for test only
     this.createAndAppendComponent(); // for test only
-    this.createAndAppendComponent(); // for test only
+
+    this.runPipeline(this.imageData);
   }
 
   public delete(): void {
@@ -75,6 +76,8 @@ class Pipeline {
   private async runPipeline(imageData: ImageData): Promise<ImageData> {
     const defaultValue = Promise.resolve({ imageData, isChanged: false });
 
+    console.log("run");
+
     const outputData = await this.pipeFlow.reduce((prev, current) => {
       const { component } = this.pipeLut[current];
 
@@ -107,6 +110,8 @@ class Pipeline {
     const component = this.getComponent(type, id, this.parentNode);
 
     this.addComponentToPipe(type, id, component);
+
+    // this.runPipeline(this.imageData);
   }
 
   private getID(type: pipelineType): symbol {

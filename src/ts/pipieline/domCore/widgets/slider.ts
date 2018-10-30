@@ -9,6 +9,9 @@ export default class Slider {
   private sliderLineOffsetX: number = 0;
   private sliderLineWidth: number = 0;
   private canMove: boolean = false;
+  private isChanged: boolean = false;
+  private prevValue: number;
+  private listeners: any[] = [];
   private logger: Logger;
   private min: number;
   private max: number;
@@ -28,16 +31,28 @@ export default class Slider {
     return this.sliderDomsPackage.slider;
   }
 
-  public getCurrentValue(): number {
-    const total = this.max - this.min;
-    const currentCenter = this.sliderLineOffsetX + this.sliderLineWidth / 2;
-    const currentPoint =  this.sliderBarOffsetX + this.sliderBarWidth / 2;
-    const currentPercentage = (currentPoint - currentCenter) / this.sliderLineWidth;
-    const currentValue = total * currentPercentage;
+  public registerListener(func): void {
+    this.listeners.push(func);
+  }
 
-    this.logger.info("current slider value: " + Math.round(total * currentPercentage));
+  private calculateValueAndNotify(): void {
+    if(this.isChanged === false) {
+      return;
+    }
 
-    return Math.round(currentValue);
+    this.updateNodeSize();
+
+    const value = this.getCurrentValue();
+
+    if (value === this.prevValue) {
+      return;
+    }
+
+    this.prevValue = value;
+
+    this.listeners.forEach((listener) => {
+      listener(value);
+    })
   }
 
   private attachSlideEvents = (): void => {
@@ -52,18 +67,6 @@ export default class Slider {
     slider.addEventListener("mouseleave", this.mouseleave, true);
   }
 
-  private removeSlideEvents = (): void => {
-    const { slider, sliderBar } = this.sliderDomsPackage;
-
-    sliderBar.removeEventListener("mousedown", this.mousedown, true);
-
-    slider.removeEventListener("mousemove", this.mousemove, true);
-
-    slider.removeEventListener("mouseup", this.mouseup, true);
-
-    slider.removeEventListener("mouseleave", this.mouseleave, true);
-  }
-
   private mousedown = (e): void => {
     this.canMove = true;
 
@@ -74,6 +77,8 @@ export default class Slider {
 
   private mousemove = (e): void => {
     if (this.canMove === true) {
+      this.isChanged = true;
+
       this.mousemoveForMove(e);
     }
   }
@@ -81,9 +86,7 @@ export default class Slider {
   private mouseup = (): void => {
     this.canMove = false;
 
-    this.updateNodeSize();
-
-    this.getCurrentValue(); // for test only
+    this.calculateValueAndNotify();
   }
 
   private mouseleave = (e): void => {
@@ -91,6 +94,8 @@ export default class Slider {
 
     if (!sliderBar.isSameNode(e.originalTarget)) {
       this.canMove = false;
+
+      this.calculateValueAndNotify();
     }
   }
 
@@ -130,5 +135,15 @@ export default class Slider {
     window.requestAnimationFrame(() => {
       node.style.left = x + "px";
     });
+  }
+
+  private getCurrentValue(): number {
+    const total = this.max - this.min;
+    const currentCenter = this.sliderLineOffsetX + this.sliderLineWidth / 2;
+    const currentPoint =  this.sliderBarOffsetX + this.sliderBarWidth / 2;
+    const currentPercentage = (currentPoint - currentCenter) / this.sliderLineWidth;
+    const currentValue = total * currentPercentage;
+
+    return Math.round(currentValue);
   }
 }

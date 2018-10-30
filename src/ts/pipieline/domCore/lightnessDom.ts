@@ -1,13 +1,36 @@
 import Slider from "./widgets/slider";
+import ContentEventEmitter from "./contentEventEmitter";
+import { IDomCore } from "../domCore/component";
 
-export default class LightnessDom {
+const MIN_LIGHTNESS = -100;
+const MAX_LIGHTNESS = 100;
+
+export default class LightnessDom implements IDomCore {
   private slider: Slider;
+  private lightness: number;
+  private contentEventEmitter: ContentEventEmitter;
 
-  constructor(min: number, max: number) {
-    this.slider = new Slider(min, max);
+  constructor() {
+    this.slider = new Slider(MIN_LIGHTNESS, MAX_LIGHTNESS);
+
+    this.slider.registerListener(this.updateLightnessParams);
+
+    this.contentEventEmitter = new ContentEventEmitter(this.slider.getSliderDom());
   }
 
-  public getLightnessDom(): HTMLElement {
+  public getContentContainer(): HTMLElement {
     return this.slider.getSliderDom();
+  }
+
+  private updateLightnessParams = (lightness) => {
+    this.lightness = lightness;
+
+    console.log(lightness);
+
+    const params = {
+      lightness,
+    }
+
+    this.contentEventEmitter.emitChangeEvent(params);
   }
 }

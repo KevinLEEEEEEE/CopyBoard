@@ -1,73 +1,15 @@
-import Logger from "../utils/log/log";
 import LightnessData from "./dataCore/lightnessData";
-import { Component, IComponentParams } from "./domCore/component";
+import { Component } from "./domCore/component";
 import LightnessDom from "./domCore/lightnessDom";
 
-const MIN_LIGHTNESS = -100;
-const MAX_LIGHTNESS = 100;
-
 export default class Lightness extends Component {
-  private lightnessData: LightnessData;
-  private lightnessDom: LightnessDom;
-  private logger: Logger;
-
   constructor(id: symbol, parentNode: HTMLElement) {
     super(id, "lightness", parentNode);
 
-    this.lightnessData = new LightnessData();
+    const lightnessData = new LightnessData();
 
-    this.lightnessDom = new LightnessDom(MIN_LIGHTNESS, MAX_LIGHTNESS);
+    const lightnessDom = new LightnessDom();
 
-    this.logger = new Logger();
-
-    this.init();
-  }
-
-  public getParams(): object {
-    return {};
-  }
-
-  public async run({ imageData, isChanged, inheritParams }: IComponentParams): Promise<IComponentParams> {
-    if (this.isVisible() === false) {
-      return Promise.resolve({ imageData, isChanged });
-    }
-
-    if (this.isDeleted() === true) {
-      this.removeSelfFromParentNode();
-
-      return Promise.resolve({ imageData, isChanged: true });
-    }
-
-    const params = this.getCombinedParams(inheritParams);
-
-    const computedImageData = await this.lightnessData.getComputedImageData(imageData, params)
-      .then((data) => {
-        return Promise.resolve({ imageData: data, isChanged: true });
-      }, (err) => {
-        this.logger.error(err);
-
-        return Promise.resolve({ imageData, isChanged });
-      })
-      .catch((err) => {
-        this.logger.error(err);
-
-        return Promise.resolve({ imageData, isChanged });
-      });
-
-    return computedImageData;
-  }
-
-  private init(): void {
-    this.appendSelfToParentNode();
-
-    const content = this.lightnessDom.getLightnessDom();
-
-    this.setContentNode(content);
-  }
-
-  private getCombinedParams(inhertParams) {
-    return {
-      lightness: 2,
-    };
+    this.init(lightnessData, lightnessDom);
   }
 }

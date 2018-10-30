@@ -1,75 +1,135 @@
 import { componentTemplate, IComponentTemplate } from "./componentTemplate";
+import PipeEventEmitter from "./pipeEventEmitter";
+import Logger from "../../utils/log/log";
 
 interface IComponentParams {
   imageData: ImageData;
   isChanged: boolean;
-  inheritParams?: object;
+}
+
+interface IDataCore {
+  getComputedImageData(imageData: ImageData, params: object): Promise<ImageData>;
+}
+
+interface IDomCore {
+  getContentContainer(): HTMLElement;
 }
 
 abstract class Component {
   private componentDomsPackage: IComponentTemplate;
+  private domCore: IDomCore;
+  private dataCore: IDataCore;
   private parentNode: HTMLElement;
   private id: symbol;
-  private visible: boolean = true;
-  private deleted: boolean = false;
-  private runEvent: CustomEvent;
-  private deleteEvent: CustomEvent;
+  private isVisible: boolean = true;
+  private isDeleted: boolean = false;
+  private isChanged: boolean = false;
+  private pipeEventEmitter: PipeEventEmitter;
+  private localImageData: ImageData = null;
+  private params: object = { lightness: 0 };
+  private logger: Logger;
 
   constructor(id: symbol, name: string, parentNode: HTMLElement) {
     this.id = id;
 
     this.parentNode = parentNode;
 
+    this.logger = new Logger();
+
     this.componentDomsPackage = componentTemplate(name);
 
-    this.createPipeEvents();
+    this.pipeEventEmitter = new PipeEventEmitter(this.componentDomsPackage.component, this.id);
+  }
+
+  public init(dataCore: IDataCore, domCore: IDomCore): void {
+    this.dataCore = dataCore;
+
+    this.domCore = domCore;
 
     this.attachBtnEvents();
+
+    this.attachContentEvents();
+
+    this.appendContentToComponent();
+
+    this.appendSelfToParentNode();
   }
 
-  public isVisible(): boolean {
-    return this.visible;
+  public async run({ imageData, isChanged }: IComponentParams): Promise<IComponentParams> {
+    const changed = isChanged || this.isChanged;
+
+    if (this.localImageData === null) {
+      this.logger.info("init, set default imageData");
+
+      this.localImageData = imageData; // for init
+
+      return Promise.resolve({ imageData, isChanged });
+    }
+
+    if (this.isVisible === false) {
+      this.logger.info("invisible, skip the component");
+
+      this.localImageData = imageData;
+
+      return Promise.resolve({ imageData, isChanged });
+    }
+
+    if (this.isDeleted === true) {
+      this.logger.info("deleted, remove self from dom");
+
+      this.removeSelfFromParentNode();
+
+      return Promise.resolve({ imageData, isChanged: true });
+    }
+
+    if (changed === false) {
+      this.logger.info("unchanged, skip the component");
+
+      return Promise.resolve({ imageData: this.localImageData, isChanged: false });
+    }
+
+    console.log(this.params);
+    console.log(imageData);
+
+    const computedImageData = await this.dataCore.getComputedImageData(imageData, this.params)
+      .then((data) => {
+        this.logger.info("changed, run component successfully");
+
+        this.localImageData = data;
+
+        this.isChanged = false;
+
+        return Promise.resolve({ imageData: data, isChanged: true });
+      }, (err) => {
+        this.logger.error(err);
+
+        this.localImageData = imageData;
+
+        return Promise.resolve({ imageData, isChanged });
+      })
+      .catch((err) => {
+        this.logger.error(err);
+
+        this.localImageData = imageData;
+
+        return Promise.resolve({ imageData, isChanged });
+      });
+
+    return computedImageData;
   }
 
-  public isDeleted(): boolean {
-    return this.deleted;
-  }
-
-  public appendSelfToParentNode(): void {
+  private appendSelfToParentNode(): void {
     this.parentNode.appendChild(this.componentDomsPackage.component);
   }
 
-  public removeSelfFromParentNode(): void {
+  private removeSelfFromParentNode(): void {
     this.parentNode.removeChild(this.componentDomsPackage.component);
   }
 
-  public setContentNode(contentNode: HTMLElement): void {
-    this.componentDomsPackage.componentContent.appendChild(contentNode);
-  }
+  private appendContentToComponent(): void {
+    const contentContainer = this.domCore.getContentContainer();
 
-  public abstract run({ imageData, isChanged }: IComponentParams): Promise<IComponentParams>;
-
-  public emitRunEvent(): void {
-    this.componentDomsPackage.component.dispatchEvent(this.runEvent);
-  }
-
-  public emitDeleteEvent(): void {
-    this.componentDomsPackage.component.dispatchEvent(this.deleteEvent);
-  }
-
-  private createPipeEvents(): void {
-    const eventDict = {
-      detail: {
-        id: this.id,
-      },
-      bubbles: true,
-      cancelable: false,
-      composed: false,
-    };
-
-    this.runEvent = new CustomEvent("run", eventDict);
-
-    this.deleteEvent = new CustomEvent("delete", eventDict);
+    this.componentDomsPackage.componentContent.appendChild(contentContainer);
   }
 
   private attachBtnEvents(): void {
@@ -89,17 +149,17 @@ abstract class Component {
   }
 
   private visibility = (): void => {
-    this.visible = !this.visible;
+    this.isVisible = !this.isVisible;
 
     this.updateVisibilityBtnIcon();
 
-    this.emitRunEvent();
+    this.pipeEventEmitter.emitRunEvent();
   }
 
   private delete = (): void => {
-    this.deleted = true;
+    this.isDeleted = true;
 
-    this.emitDeleteEvent();
+    this.pipeEventEmitter.emitDeleteEvent();
 
     this.removeBtnEvents();
   }
@@ -110,9 +170,27 @@ abstract class Component {
     visibilityBtn.classList.toggle("opacityBlack");
     visibilityBtn.classList.toggle("opacityBlackZero");
   }
+
+  private attachContentEvents(): void {
+    const contentContainer = this.domCore.getContentContainer();
+
+    contentContainer.addEventListener("change", this.change, true);
+  }
+
+  private change = (e: CustomEvent): void => {
+    e.stopPropagation();
+    
+    this.params = e.detail;
+
+    this.isChanged = true;
+
+    this.pipeEventEmitter.emitRunEvent();
+  }
 }
 
 export {
   Component,
   IComponentParams,
+  IDataCore,
+  IDomCore,
 };
