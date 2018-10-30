@@ -100,6 +100,8 @@ abstract class Component {
     this.deleted = true;
 
     this.emitDeleteEvent();
+
+    this.removeBtnEvents();
   }
 
   private updateVisibilityBtnIcon() {

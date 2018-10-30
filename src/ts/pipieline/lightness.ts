@@ -27,7 +27,7 @@ export default class Lightness extends Component {
     return {};
   }
 
-  public run({ imageData, isChanged, inheritParams }: IComponentParams): Promise<IComponentParams> {
+  public async run({ imageData, isChanged, inheritParams }: IComponentParams): Promise<IComponentParams> {
     if (this.isVisible() === false) {
       return Promise.resolve({ imageData, isChanged });
     }
@@ -40,9 +40,9 @@ export default class Lightness extends Component {
 
     const params = this.getCombinedParams(inheritParams);
 
-    return this.lightnessData.getComputedImageData(imageData, params)
-      .then((computedImageData) => {
-        return Promise.resolve({ imageData: computedImageData, isChanged: true });
+    const computedImageData = await this.lightnessData.getComputedImageData(imageData, params)
+      .then((data) => {
+        return Promise.resolve({ imageData: data, isChanged: true });
       }, (err) => {
         this.logger.error(err);
 
@@ -53,6 +53,8 @@ export default class Lightness extends Component {
 
         return Promise.resolve({ imageData, isChanged });
       });
+
+    return computedImageData;
   }
 
   private init(): void {

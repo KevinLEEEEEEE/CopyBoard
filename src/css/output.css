@@ -98,7 +98,6 @@
 
 .sliderController {
   display: flex;
-  justify-content: center;
   align-items: center;
   position: relative;
   width: 70%;
@@ -110,10 +109,12 @@
   height: 2px;
   border-radius: 1px;
   background-color: rgb(50, 50, 50);
+  pointer-events: none;
 }
 
 .sliderBar {
   position: absolute;
+  left: calc(50% - 10px);
   width: 20px;
   height: 20px;
   border: 2px rgb(50, 50, 50) solid;
