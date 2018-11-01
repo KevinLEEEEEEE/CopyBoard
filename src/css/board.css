@@ -10,6 +10,11 @@
   justify-content: space-between;
 }
 
+.boardContent {
+  position: relative;
+  font-size: 0rem;
+}
+
 .controlPanel {
   display: flex;
   flex-direction: row;
@@ -26,10 +31,17 @@
   height: 35px;
   padding: 0;
   border: transparent;
-  background-size: 65%;
   background-color: transparent;
   background-repeat: no-repeat;
   background-position: center;
+}
+
+.leftPanel button {
+  background-size: 80%;
+}
+
+.rightPanel button {
+  background-size: 65%;
 }
 
 .controlPanel>div button:not(:first-child) {
@@ -39,49 +51,27 @@
 .nameInput {
   width: 60px;
   height: 35px;;
-  border: transparent;
-  background: transparent;
   overflow: hidden;
-  color: white;
 }
 
-.opacityInput, .pixelateInput {
+.opacityInput {
   position: absolute;
   width: 35px;
   height: 35px;
-  border: transparent;
-  outline: transparent;
-  background: transparent;
-  box-shadow: transparent;
   text-align: center;
-  color: white;
   -moz-appearance: textfield !important;
-}
-
-.pixelateInput {
-  top: 0;
-  left: 0;
-}
-
-input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
-  -webkit-appearance: none !important;
 }
 
 .rightPanel>div:hover button {
   visibility: visible;
 }
 
-.rightPanel>div:hover {
+.rightPanel>div {
   border-radius: 35px;
-  background-color: rgba(0, 0, 0, .5);
 }
 
 .boardContent {
   pointer-events: initial;
-}
-
-.noDisplay {
-  display: none; 
 }
 
 .tmpTopLayer {
@@ -93,52 +83,21 @@ input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
 }
 
 .opacity {
-  background-image: url('../image//icons//display.png');
-  background-size: 80% !important;
+  background-image: url('../image/icons/display.png');
 }
 
 .opacityZero {
   background-image: url('../image/icons/noDisplay.png') !important;
-  background-size: 80% !important;
 }
 
-.moveUp {
-  background-image: url('../image//icons//moveup.png');
-}
-
-.moveTop {
-  background-image: url('../image//icons//movetop.png');
-}
-
-.moveDown {
-  background-image: url('../image//icons//movedown.png');
-}
-
-.moveBottom {
-  background-image: url('../image//icons//movebottom.png');
-}
-
-.colorSelector {
-  background-image: url('../image//icons//colorSelector.png');
-}
-
-.pixelate {
-  background-image: url('../image//icons//pixelate.png');
+.colorPicker {
+  background-image: url('../image/icons/colorPicker.png');
 }
 
 .lock {
-  background-image: url('../image//icons//lock.png');
+  background-image: url('../image/icons/lock.png');
 }
 
 .unlock {
-  background-image: url('../image//icons//unlock.png');
+  background-image: url('../image/icons/unlock.png');
 }
-
-.delete {
-  background-image: url('../image//icons//delete.png');
-}
-
-.cursorCrossHair {
-  cursor: crosshair !important;
-}
-

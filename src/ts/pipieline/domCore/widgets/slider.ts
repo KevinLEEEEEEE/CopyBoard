@@ -23,32 +23,18 @@ export default class Slider {
     this.attachSlideEvents();
   }
 
+  public delete(): void {
+    this.removeSlideEvents();
+
+    this.listeners = [];
+  }
+
   public getSliderDom(): HTMLDivElement {
     return this.sliderDomsPackage.slider;
   }
 
   public registerListener(func): void {
     this.listeners.push(func);
-  }
-
-  private calculateValueAndNotify(): void {
-    if (this.isChanged === false) {
-      return;
-    }
-
-    this.updateNodeSize();
-
-    const value = this.getCurrentValue();
-
-    if (value === this.prevValue) {
-      return;
-    }
-
-    this.prevValue = value;
-
-    this.listeners.forEach((listener) => {
-      listener(value);
-    });
   }
 
   private attachSlideEvents = (): void => {
@@ -61,6 +47,18 @@ export default class Slider {
     slider.addEventListener("mouseup", this.mouseup, true);
 
     slider.addEventListener("mouseleave", this.mouseleave, true);
+  }
+
+  private removeSlideEvents = (): void => {
+    const { slider, sliderBar } = this.sliderDomsPackage;
+
+    sliderBar.removeEventListener("mousedown", this.mousedown, true);
+
+    slider.removeEventListener("mousemove", this.mousemove, true);
+
+    slider.removeEventListener("mouseup", this.mouseup, true);
+
+    slider.removeEventListener("mouseleave", this.mouseleave, true);
   }
 
   private mousedown = (e): void => {
@@ -93,6 +91,26 @@ export default class Slider {
 
       this.calculateValueAndNotify();
     }
+  }
+
+  private calculateValueAndNotify(): void {
+    if (this.isChanged === false) {
+      return;
+    }
+
+    this.updateNodeSize();
+
+    const value = this.getCurrentValue();
+
+    if (value === this.prevValue) {
+      return;
+    }
+
+    this.prevValue = value;
+
+    this.listeners.forEach((listener) => {
+      listener(value);
+    });
   }
 
   private updateMousePosition(e): void {

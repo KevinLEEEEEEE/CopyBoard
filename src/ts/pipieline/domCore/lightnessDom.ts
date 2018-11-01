@@ -22,6 +22,10 @@ export default class LightnessDom extends DomCore {
     this.slider.registerListener(this.updateLightnessParams);
   }
 
+  public delete(): void {
+    this.slider.delete();
+  }
+
   public getContentContainer(): HTMLElement {
     return this.sliderDom;
   }

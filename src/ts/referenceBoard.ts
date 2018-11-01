@@ -1,6 +1,7 @@
 import Board from "./board";
 import Pixelate from "./cores/pixelate";
 import { IReferenceTemplate, referenceTemplate } from "./templates/referenceTemplate";
+import ColorChangeEventEmitter from "./utils/colorChangeEventEmitter";
 import Log from "./utils/log/log";
 
 const REFERENCE_CONTROLLER_HEIGHT = 70;
@@ -9,24 +10,25 @@ const WIDTH_LIMITAION_RATIO = 3;
 const MIN_BOARD_WIDTH = 300;
 const OPACITY_RATIO = 0.6;
 const enum STATE {
-  default,
-  move,
-  scale,
-  locked,
+  default = "default",
+  move = "move",
+  scale = "scale",
+  pickColor = "pickColor",
 }
 
 export default class ReferenceBoard extends Board {
+  private readonly colorChangeEventEmitter: ColorChangeEventEmitter;
   private readonly refDomsPackage: IReferenceTemplate;
   private readonly parentNode: HTMLElement;
+  private pixelateInstance: Pixelate;
   private clickOffsetPos: number[] = [0, 0];
   private clickPagePos: number[] = [0, 0];
   private tmpBoardSize: number[] = [0, 0];
-  private isOpacityFocused: boolean = false;
   private isPixelateFocused: boolean = false;
-  private isColorPickerFocused: boolean = false;
-  private pixelateInstance: Pixelate;
-  private logger: Log;
+  private isOpacityFocused: boolean = false;
+  private isLocked: boolean = false;
   private state: STATE;
+  private logger: Log;
 
   constructor(name: string, parentNode: HTMLElement) {
     super(name);
@@ -35,7 +37,9 @@ export default class ReferenceBoard extends Board {
 
     this.refDomsPackage = referenceTemplate();
 
-    this.state = STATE.default;
+    this.colorChangeEventEmitter = new ColorChangeEventEmitter(parentNode);
+
+    this.initStateMachine();
 
     this.logger = new Log();
   }
@@ -102,6 +106,24 @@ export default class ReferenceBoard extends Board {
     });
   }
 
+  private initStateMachine(): void {
+    const that = this;
+
+    Reflect.defineProperty(this, "state", {
+      get() {
+        return this._state;
+      },
+
+      set(state: STATE) {
+        that.updateCursorStyle(this._state, state);
+
+        this._state = state;
+      },
+    });
+
+    this.state = STATE.default;
+  }
+
   private displayImageOnCanvas(img: HTMLImageElement): void {
     const { width, height } = img;
 
@@ -144,6 +166,28 @@ export default class ReferenceBoard extends Board {
     this.parentNode.removeChild(this.refDomsPackage.referenceBoard);
   }
 
+  private updateCursorStyle = (prevState: STATE, currentState: STATE): void => {
+    this.toggleCursorStyle(prevState);
+
+    this.toggleCursorStyle(currentState);
+  }
+
+  private toggleCursorStyle(state: STATE): void {
+    const { cvsContainer } = this.refDomsPackage;
+
+    switch (state) {
+      case STATE.move:
+      cvsContainer.classList.toggle("cursorMove");
+      break;
+      case STATE.scale:
+      cvsContainer.classList.toggle("cursorResize");
+      break;
+      case STATE.pickColor:
+      cvsContainer.classList.toggle("cursorCrossHair");
+      break;
+    }
+  }
+
   // -----------------------------------------------------------------------------------------
 
   private attachMoveEvents(): void {
@@ -177,13 +221,13 @@ export default class ReferenceBoard extends Board {
       return;
     }
 
+    this.updateMouseState(e);
+
     this.updateMousePosition(e);
 
     this.updateBoardSize();
 
-    this.updateMouseState(e);
-
-    this.updateLayerIndex();
+    this.updateLayerZIndex();
   }
 
   private mousemove = (e): void => {
@@ -201,12 +245,13 @@ export default class ReferenceBoard extends Board {
   private mouseup = (): void => {
     this.restoreMouseState();
 
-    this.updateLayerIndex();
+    this.updateLayerZIndex();
   }
 
   private canAcceptMousedown(target: HTMLElement): boolean {
-    return this.refDomsPackage.cvsContainer.contains(target) && this.state === STATE.default
-    && this.isColorPickerFocused === false;
+    return this.refDomsPackage.cvsContainer.contains(target) &&
+            this.state === STATE.default &&
+            this.isLocked === false;
   }
 
   private updateMousePosition(e): void {
@@ -232,17 +277,11 @@ export default class ReferenceBoard extends Board {
     }
   }
 
-  private updateLayerIndex(): void {
-    switch (this.state) {
-      case STATE.default:
-      case STATE.locked:
-      this.refDomsPackage.referenceBoard.classList.remove("tmpTopLayer");
-      break;
-      case STATE.move:
-      case STATE.scale:
+  private updateLayerZIndex(): void {
+    if (this.state === STATE.move || this.state === STATE.scale) {
       this.refDomsPackage.referenceBoard.classList.add("tmpTopLayer");
-      break;
-      default:
+    } else {
+      this.refDomsPackage.referenceBoard.classList.remove("tmpTopLayer");
     }
   }
 
@@ -366,19 +405,23 @@ export default class ReferenceBoard extends Board {
   }
 
   private removeSettingBtnEvents(): void {
-    const { deleteBtn, lockerBtn } = this.refDomsPackage;
+    const { deleteBtn, lockerBtn, nameInput, opacityBtn, opacityInput } = this.refDomsPackage;
 
     deleteBtn.removeEventListener("click", this.delete, true);
 
     lockerBtn.removeEventListener("click", this.locker, true);
+
+    nameInput.removeEventListener("change", this.nameChange, true);
+
+    opacityBtn.removeEventListener("click", this.opacity, true);
+
+    opacityInput.removeEventListener("blur", this.opacityBlur, true);
+
+    opacityInput.removeEventListener("change", this.opacityChange, true);
   }
 
   private locker = (): void => {
-    if (this.state !== STATE.locked) {
-      this.state = STATE.locked;
-    } else {
-      this.state = STATE.default;
-    }
+    this.isLocked = !this.isLocked;
 
     this.updateLockerIcon();
   }
@@ -397,7 +440,9 @@ export default class ReferenceBoard extends Board {
   }
 
   private opacity = (): void => {
-    this.displayOpacityInputAndHideBtn();
+    this.updateOpacityInputAndBtn();
+
+    this.focusAndSelectOpacityInput();
 
     this.isOpacityFocused = true;
   }
@@ -428,7 +473,7 @@ export default class ReferenceBoard extends Board {
 
     this.changeOpacityOfIcon(opacity);
 
-    this.displayBtnAndHideOpacityInput();
+    this.updateOpacityInputAndBtn();
 
     this.isOpacityFocused = false;
   }
@@ -453,24 +498,20 @@ export default class ReferenceBoard extends Board {
     opacityBtn.style.opacity = iconOpacity.toString();
   }
 
-  private displayOpacityInputAndHideBtn(): void {
+  private updateOpacityInputAndBtn(): void {
     const { opacityBtn, opacityInput } = this.refDomsPackage;
 
-    opacityInput.classList.remove("noDisplay");
+    opacityInput.classList.toggle("noDisplay");
 
-    opacityBtn.classList.add("noDisplay");
+    opacityBtn.classList.toggle("noDisplay");
+  }
+
+  private focusAndSelectOpacityInput(): void {
+    const { opacityInput } = this.refDomsPackage;
 
     opacityInput.focus();
 
     opacityInput.select();
-  }
-
-  private displayBtnAndHideOpacityInput(): void {
-    const { opacityBtn, opacityInput } = this.refDomsPackage;
-
-    opacityInput.classList.add("noDisplay");
-
-    opacityBtn.classList.remove("noDisplay");
   }
 
   // -----------------------------------------------------------------------------------------
@@ -481,6 +522,8 @@ export default class ReferenceBoard extends Board {
     colorPickerBtn.addEventListener("click", this.colorPicker, true);
 
     cvsContainer.addEventListener("mousedown", this.pickColor, true);
+
+    cvsContainer.addEventListener("contextmenu", this.contextmenu, true);
 
     pixelateBtn.addEventListener("click", this.pixelate, true);
 
@@ -496,6 +539,8 @@ export default class ReferenceBoard extends Board {
 
     cvsContainer.removeEventListener("mousedown", this.pickColor, true);
 
+    cvsContainer.removeEventListener("contextmenu", this.contextmenu, true);
+
     pixelateBtn.removeEventListener("click", this.pixelate, true);
 
     pixelateInput.removeEventListener("blur", this.pixelateBlur, true);
@@ -504,49 +549,46 @@ export default class ReferenceBoard extends Board {
   }
 
   private colorPicker = (): void => {
-    this.isColorPickerFocused = true;
-
-    this.changeCursorIcon();
+    this.state = STATE.pickColor;
   }
 
-  private pickColor = (e): void => {
-    if (this.isColorPickerFocused === false) {
+  private pickColor = (e: MouseEvent): void => {
+    if (this.state !== STATE.pickColor) {
       return;
     }
 
-    const { offsetX, offsetY } = e;
-    const rgba = this.getColorAt(offsetX, offsetY);
+    if (e.button !== 2) {
+      const { offsetX, offsetY } = e;
+      const rgba = this.getColorAt(offsetX, offsetY);
 
-    this.logger.info(rgba.toString());
+      this.colorChangeEventEmitter.emitColorChangeEvents(rgba);
+    }
 
-    this.isColorPickerFocused = false;
-
-    this.changeCursorIcon();
+    this.state = STATE.default;
   }
 
-  private changeCursorIcon(): void {
-    const { cvsContainer } = this.refDomsPackage;
-
-    if (this.isColorPickerFocused === true) {
-      cvsContainer.classList.add("cursorCrossHair");
-    } else {
-      cvsContainer.classList.remove("cursorCrossHair");
-    }
+  private contextmenu(e: MouseEvent): void {
+    e.preventDefault();
+    e.stopPropagation();
   }
 
   private pixelate = (): void => {
-    this.displayPixelateInputAndHideBtn();
+    this.updatePixelateInputAndBtn();
+
+    this.focusAndSelectPixelateInput();
 
     this.isPixelateFocused = true;
   }
 
   private pixelateBlur = (e): void => {
-    if (this.isPixelateFocused === true) {
-      try {
-        this.pixelateChange(e);
-      } catch (e) {
-        this.logger.error(e);
-      }
+    if (this.isPixelateFocused !== true) {
+      return;
+    }
+
+    try {
+      this.pixelateChange(e);
+    } catch (e) {
+      this.logger.error(e);
     }
   }
 
@@ -564,7 +606,7 @@ export default class ReferenceBoard extends Board {
 
     this.pixelateContentCanvas(pixelSize);
 
-    this.displayBtnAndHidePixelateInput();
+    this.updatePixelateInputAndBtn();
 
     this.isPixelateFocused = false;
   }
@@ -576,23 +618,19 @@ export default class ReferenceBoard extends Board {
     });
   }
 
-  private displayPixelateInputAndHideBtn(): void {
+  private updatePixelateInputAndBtn(): void {
     const { pixelateBtn, pixelateInput } = this.refDomsPackage;
 
-    pixelateInput.classList.remove("noDisplay");
+    pixelateInput.classList.toggle("noDisplay");
 
-    pixelateBtn.classList.add("noDisplay");
+    pixelateBtn.classList.toggle("noDisplay");
+  }
+
+  private focusAndSelectPixelateInput(): void {
+    const { pixelateInput } = this.refDomsPackage;
 
     pixelateInput.focus();
 
     pixelateInput.select();
-  }
-
-  private displayBtnAndHidePixelateInput(): void {
-    const { pixelateBtn, pixelateInput } = this.refDomsPackage;
-
-    pixelateInput.classList.add("noDisplay");
-
-    pixelateBtn.classList.remove("noDisplay");
   }
 }

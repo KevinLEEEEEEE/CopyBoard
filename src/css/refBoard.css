@@ -1,0 +1,45 @@
+.referenceBoard .rightPanel>div:hover {
+  background-color: rgba(0, 0, 0, .5);
+}
+
+.pixelateInput {
+  position: absolute;
+  width: 35px;
+  height: 35px;
+  border: transparent;
+  outline: transparent;
+  background: transparent;
+  box-shadow: transparent;
+  text-align: center;
+  color: white;
+  -moz-appearance: textfield !important;
+}
+
+.pixelateInput {
+  top: 0;
+  left: 0;
+}
+
+.moveUp {
+  background-image: url('../image//icons//moveup.png');
+}
+
+.moveTop {
+  background-image: url('../image//icons//movetop.png');
+}
+
+.moveDown {
+  background-image: url('../image//icons//movedown.png');
+}
+
+.moveBottom {
+  background-image: url('../image//icons//movebottom.png');
+}
+
+.pixelate {
+  background-image: url('../image//icons//pixelate.png');
+}
+
+.delete {
+  background-image: url('../image//icons//delete.png');
+}

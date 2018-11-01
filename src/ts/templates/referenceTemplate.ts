@@ -48,7 +48,7 @@ const referenceTemplate = (): IReferenceTemplate => {
   const moveBottomBtn: HTMLButtonElement = createAndAppend<HTMLButtonElement>(div4, "button", "moveBottom");
 
   const div5: HTMLDivElement = createAndAppend<HTMLDivElement>(rightPanel, "div");
-  const colorPickerBtn: HTMLButtonElement = createAndAppend<HTMLButtonElement>(div5, "button", "colorSelector");
+  const colorPickerBtn: HTMLButtonElement = createAndAppend<HTMLButtonElement>(div5, "button", "colorPicker");
   const pixelateBtn: HTMLButtonElement = createAndAppend<HTMLButtonElement>(div5, "button", "pixelate");
   const pixelateInput: HTMLInputElement =
   createAndAppend<HTMLInputElement>(div5, "input", "pixelateInput", "noDisplay");

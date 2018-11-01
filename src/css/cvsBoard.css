@@ -1,0 +1,39 @@
+.canvasBoard .rightPanel>div:not(:first-child):hover {
+  background-color: rgba(0, 0, 0, .5);
+}
+
+.setting {
+  background-image: url('../image/icons/setting.png');
+}
+
+.bucket {
+  background-image: url('../image/icons/bucket.png');
+}
+
+.pen {
+  background-image: url('../image/icons/pen.png');
+}
+
+.eraser {
+  background-image: url('../image/icons/eraser.png');
+}
+
+.move {
+  background-image: url('../image/icons/move.png');
+}
+
+.canvasBoard canvas:first-child {
+  background-color: rgba(255, 255, 255, .2);
+}
+
+.canvasBoard canvas:nth-child(2) {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.cursorShortCrossHair {
+  cursor: url("../image/icons/shartCrossHair.ico") 8 8, crosshair;
+}

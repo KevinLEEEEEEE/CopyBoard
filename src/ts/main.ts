@@ -1,26 +1,50 @@
+import CanvasBoard from "./canvasBoard";
 import ColorDial from "./colorDial";
 import FileInput from "./fileInput";
 import OutputPanel from "./outputPanel";
 import ReferenceBoard from "./referenceBoard";
 
 export default class Main {
-  public init() {
+  private colorDial: ColorDial;
+  private fileInput: FileInput;
+  private outputPanel: OutputPanel;
+  private canvasBoard: CanvasBoard;
+
+  constructor() {
     const colorDialParentNode: HTMLElement = document.getElementById("colorDialEventsLayer");
     const fileInputDetectNode: HTMLElement = document.getElementById("main");
+    const canvasBoardNode: HTMLElement = document.getElementById("canvasBoard");
+    const pipelineParentNode: HTMLElement = document.getElementById("pipeline");
 
-    const colorDial = new ColorDial(colorDialParentNode);
+    this.colorDial = new ColorDial(colorDialParentNode);
 
-    colorDial.init();
+    this.fileInput = new FileInput(fileInputDetectNode);
 
-    const fileInput1 = new FileInput(fileInputDetectNode);
+    this.outputPanel = new OutputPanel(pipelineParentNode);
 
-    fileInput1.init();
+    this.canvasBoard = new CanvasBoard("canvas", canvasBoardNode);
+  }
 
-    fileInput1.registerEvents(this.handleFile.bind(this));
+  public init() {
+    this.attachColorChangeEvents();
 
-    const output = new OutputPanel();
+    this.initComponents();
+  }
 
-    output.init();
+  private attachColorChangeEvents(): void {
+    document.body.addEventListener("colorChange", this.colorChange, true);
+  }
+
+  private initComponents(): void {
+    this.colorDial.init();
+
+    this.fileInput.init();
+
+    this.fileInput.registerEvents(this.handleFile.bind(this));
+
+    this.outputPanel.init();
+
+    this.canvasBoard.init();
   }
 
   private handleFile(base64: string, name: string): void {
@@ -28,9 +52,16 @@ export default class Main {
   }
 
   private addReferencrBoard(base64: string, name: string): void {
-    const mainDom: HTMLElement = document.getElementById("main");
-    const referenceBoard = new ReferenceBoard(name, mainDom);
+    const parentNode: HTMLElement = document.getElementById("main");
+    const referenceBoard = new ReferenceBoard(name, parentNode);
 
     referenceBoard.init(base64);
+  }
+
+  private colorChange = (e: CustomEvent) => {
+    const { rgba } = e.detail;
+    const [r, g, b] = rgba;
+
+    this.colorDial.setRGBColor(r, g, b);
   }
 }

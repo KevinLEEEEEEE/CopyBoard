@@ -1,5 +1,5 @@
 .output {
-  display: flex;
+  display: none;
   justify-content: center;
   align-items: center;
   position: absolute;
@@ -9,6 +9,10 @@
   height: 100vh;
   z-index: 200;
   background-color: rgba(0, 0, 0, .3);
+}
+
+.outputDisplay {
+  display: flex !important;
 }
 
 .outputPanel {
@@ -22,7 +26,7 @@
   background-color: rgb(245, 245, 245);
 }
 
-.outputPreview {
+.previewBorder {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -135,4 +139,44 @@
 
 .deleteBlack {
   background-image: url('../image//icons//deleteBlack.png');
+}
+
+.componentBtnContainer {
+  text-align: center;
+  padding: 25px;
+}
+
+.componentBtn {
+  width: 45px;
+  height: 45px;
+  margin: 0 10px;
+  border: 1px black solid;
+  border-radius: 25px;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: 55% !important;
+}
+
+.componentBtn:hover {
+  background-size: 60% !important;
+}
+
+.lightnessBtn {
+  background: url('../image//icons/lightness.png');
+}
+
+.contrastBtn {
+  background: url('../image//icons/contrast.png');
+}
+
+.saturationBtn {
+  background: url('../image//icons/saturation.png');
+}
+
+.curveBtn {
+  background: url('../image//icons/curve.png');
+}
+
+.downloadBtn {
+  background: url('../image//icons/download.png');
 }

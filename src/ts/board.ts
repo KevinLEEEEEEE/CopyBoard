@@ -43,7 +43,10 @@ export default class Board {
   }
 
   public getColorAt(x: number, y: number): number[] {
-    const index = (y * this.width + x) * 4;
+    const ratio = this.cssWidth / this.width;
+    const scaledX = Math.round(x / ratio);
+    const scaledY = Math.round(y / ratio);
+    const index = (scaledY * this.width + scaledX) * 4;
     const imageData = this.getImageData();
     const { data } = imageData;
 
@@ -71,17 +74,21 @@ export default class Board {
   public setStyleWidth(width: number) {
     this.cssWidth = width;
 
-    this.canvas.style.width = width + "px";
+    window.requestAnimationFrame(() => {
+      this.canvas.style.width = width + "px";
+    });
   }
 
   public setStyleHeight(height: number) {
     this.cssHeight = height;
 
-    this.canvas.style.height = height + "px";
+    window.requestAnimationFrame(() => {
+      this.canvas.style.height = height + "px";
+    });
   }
 
   public setCanvasParentNode(parentNode: HTMLElement): void {
-      parentNode.appendChild(this.canvas);
+    parentNode.appendChild(this.canvas);
   }
 
   // -----------------------------------------------------------------------------------------

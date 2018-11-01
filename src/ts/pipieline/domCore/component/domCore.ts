@@ -7,6 +7,8 @@ export default abstract class DomCore {
     this.contentEventEmitter = new ContentEventEmitter();
   }
 
+  public abstract delete(): void;
+
   public abstract getContentContainer(): HTMLElement;
 
   public emitChangeEvent(node: HTMLElement, params: object): void {

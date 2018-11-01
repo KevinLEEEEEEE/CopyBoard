@@ -15,3 +15,31 @@ body {
 .noPointerEvents {
   pointer-events: none !important;
 }
+
+.noDisplay {
+  display: none; 
+}
+
+.cursorCrossHair {
+  cursor: crosshair;
+}
+
+.cursorMove {
+  cursor: move;
+}
+
+.cursorResize {
+  cursor: w-resize;
+}
+
+input {
+  border: transparent;
+  outline: transparent;
+  background: transparent;
+  box-shadow: transparent;
+  color: white;
+}
+
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+}

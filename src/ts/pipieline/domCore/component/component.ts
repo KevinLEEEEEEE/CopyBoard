@@ -53,13 +53,14 @@ abstract class Component {
   public async run({ imageData, isChanged }: IComponentParams): Promise<IComponentParams> {
     const changed = isChanged || this.isChanged;
 
-    this.logger.info("params: ");
-    console.log(this.params);
+    if (this.isDeleted === false) {
+      this.logger.info("params: ", this.params); // for test
+    }
 
     if (this.localImageData === null) {
       this.logger.info("init, set default imageData");
 
-      this.localImageData = imageData; // for init
+      this.localImageData = imageData; // init localstorage after created
 
       return Promise.resolve({ imageData, isChanged });
     }
@@ -67,15 +68,11 @@ abstract class Component {
     if (this.isVisible === false) {
       this.logger.info("invisible, skip the component");
 
-      this.localImageData = imageData;
-
       return Promise.resolve({ imageData, isChanged });
     }
 
     if (this.isDeleted === true) {
       this.logger.info("deleted, remove self from dom");
-
-      this.removeSelfFromParentNode();
 
       return Promise.resolve({ imageData, isChanged: true });
     }
@@ -127,6 +124,14 @@ abstract class Component {
     this.componentDomsPackage.componentContent.appendChild(contentContainer);
   }
 
+  private removeContentFromComponent(): void {
+    const contentContainer = this.domCore.getContentContainer();
+
+    this.domCore.delete();
+
+    this.componentDomsPackage.componentContent.removeChild(contentContainer);
+  }
+
   private attachBtnEvents(): void {
     const { visibilityBtn, deleteBtn } = this.componentDomsPackage;
 
@@ -157,6 +162,12 @@ abstract class Component {
     this.pipeEventEmitter.emitDeleteEvent();
 
     this.removeBtnEvents();
+
+    this.removeContentEvents();
+
+    this.removeContentFromComponent();
+
+    this.removeSelfFromParentNode();
   }
 
   private updateVisibilityBtnIcon() {
@@ -170,6 +181,12 @@ abstract class Component {
     const contentContainer = this.domCore.getContentContainer();
 
     contentContainer.addEventListener("change", this.change, true);
+  }
+
+  private removeContentEvents(): void {
+    const contentContainer = this.domCore.getContentContainer();
+
+    contentContainer.removeEventListener("change", this.change, true);
   }
 
   private change = (e: CustomEvent): void => {

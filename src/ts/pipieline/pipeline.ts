@@ -5,10 +5,15 @@ const enum pipelineType {
   lightness,
 }
 
+interface IPipelineComponents {
+  lightnessBtn: HTMLElement;
+}
+
 class Pipeline {
   private pipeFlow: symbol[] = [];
   private pipeLut: object = {};
   private readyToDelete: symbol[] = [];
+  private componentNodes: IPipelineComponents;
   private parentNode: HTMLElement;
   private imageData: ImageData;
   private logger: Logger;
@@ -24,19 +29,27 @@ class Pipeline {
 
     this.attachPipeEvents();
 
-    this.createAndAppendComponent(); // for test only
-    this.createAndAppendComponent(); // for test only
-    this.createAndAppendComponent(); // for test only
+    this.getComponentBtnNodes();
 
-    this.runPipeline(this.imageData);
+    this.attachComponentBtnEvents();
   }
 
   public delete(): void {
     this.removePipeEvents();
+
+    this.removeComponentBtnEvents();
   }
 
   public setImageData(imageData: ImageData) {
     this.imageData = imageData;
+  }
+
+  private getComponentBtnNodes(): void {
+    const lightnessBtn = document.getElementById("lightnessBtn"); // error handler required
+
+    this.componentNodes = {
+      lightnessBtn,
+    };
   }
 
   private attachPipeEvents(): void {
@@ -72,7 +85,7 @@ class Pipeline {
       return prev.then((value) => component.run(value));
     }, defaultValue);
 
-    this.cleanDeletedComponents();
+    this.cleanDeletedComponents(); // run after pipeline to ensure the "changed"
 
     this.logger.info("output: " + outputData.imageData.data[0]);
 
@@ -97,15 +110,36 @@ class Pipeline {
     }
   }
 
-  private createAndAppendComponent() {
-    const type = pipelineType.lightness; // for test only
+  private attachComponentBtnEvents(): void {
+    const { lightnessBtn } = this.componentNodes;
 
+    lightnessBtn.addEventListener("click", this.componentBtnClick, true);
+  }
+
+  private removeComponentBtnEvents(): void {
+    const { lightnessBtn } = this.componentNodes;
+
+    lightnessBtn.removeEventListener("click", this.componentBtnClick, true);
+  }
+
+  private componentBtnClick = (e) => {
+    const { name } = e.target;
+
+    switch (name) {
+      case "lightness":
+      this.createAndAppendComponent(pipelineType.lightness);
+      break;
+      default:
+    }
+  }
+
+  private createAndAppendComponent(type: pipelineType) {
     const id = this.getID(type);
     const component = this.getComponent(type, id, this.parentNode);
 
     this.addComponentToPipe(type, id, component);
 
-    // flush after creation
+    this.runPipeline(this.imageData);
   }
 
   private getID(type: pipelineType): symbol {

@@ -7,9 +7,9 @@
     <title>pixel online</title>
   </head>
   <body>
-    <div id="main">
+    <div id="main"></div>
 
-    </div>
+    <div id="canvasBoard"></div>
 
     <div id="colorDialEventsLayer" class="noPointerEvents"></div>
 
@@ -34,12 +34,12 @@
             <button class="moveBottom"></button>
           </div>
           <div>
-            <button class="colorSelector"></button>
+            <button class="colorPicker"></button>
             <button class="pixelate"></button>
             <input type="number" min="0" class="pixelateInput">
           </div>
           <div>
-            <button class="locke unlock"></button>
+            <button class="lock unlock"></button>
             <button class="delete"></button>
           </div>
         </div>
@@ -49,9 +49,42 @@
       </div>
     </div> -->
 
-    <!-- <div class="board drawBoard"></div> -->
+    <!-- <div class="board canvasBoard">
+      <div class="boardController">
+        <div class="controlPanel leftPanel">
+          <div>
+            <input type="text" placeholder="name" class="nameInput">
+          </div>
+          <div>
+            <button class="opacity"></button>
+            <input type="number" min="0" max="100" step="1" class="opacityInput">
+          </div>
+        </div>
+        <div class="controlPanel rightPanel">
+          <div>
+            <button class="move"></button>
+          </div>
+          <div>
+            <button class="pen"></button>
+            <button class="eraser"></button>
+          </div>
+          <div>
+            <button class="colorPicker"></button>
+            <button class="bucket"></button>
+          </div>
+          <div>
+            <button class="lock unlock"></button>
+            <button class="setting"></button>
+          </div>
+        </div>
+      </div>
+      <div class="boardContent">
+        <canvas></canvas>
+        <canvas></canvas>
+      </div>
+    </div> -->
 
-    <!-- <div class="colorDial" draggable="true">
+    <!-- <div class="colorDial">
       <div>
         <div class="colorContainer">
           <input type="color">
@@ -61,14 +94,23 @@
         </div>
       </div>
     </div> -->
+
     <div class="output">
       <div class="outputPanel">
         <div class="outputPreview">
-          <canvas class="outputCanvas" id="outputCanvas"></canvas>
+          <div class="previewBorder">
+            <canvas class="outputCanvas" id="outputCanvas"></canvas>
+          </div>
+          <div class="componentBtnContainer">
+            <button class="componentBtn lightnessBtn" id="lightnessBtn" name="lightness"></button>
+            <button class="componentBtn contrastBtn" id="contrastBtn" name="contrast"></button>
+            <button class="componentBtn saturationBtn" id="saturationBtn" name="saturation"></button>
+            <button class="componentBtn curveBtn" id="curveBtn" name="curve"></button>
+            <button class="componentBtn downloadBtn" id="downloadBtn" name="download"></button>
+          </div>
         </div>
         <div class="outputComponents">
           <div id="pipeline">
-
             <!-- <div class="component">
               <div class="componentController">
                 <div>
@@ -90,7 +132,6 @@
                 </div>
               </div>
             </div> -->
-
           </div>
         </div>
       </div>

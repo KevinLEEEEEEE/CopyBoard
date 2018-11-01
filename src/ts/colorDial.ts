@@ -60,6 +60,8 @@ export default class ColorDial {
   public setRGBColor(r: number, g: number, b: number): void {
     const hex: string = this.colorConversion.rgbToHex(r, g, b);
 
+    console.log(r, g, b);
+
     this.setHexColor(hex);
   }
 
