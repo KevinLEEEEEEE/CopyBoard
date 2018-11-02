@@ -22,6 +22,13 @@
   background-image: url('../image/icons/move.png');
 }
 
+.canvasBoard canvas {
+  image-rendering: -moz-crisp-edges;         
+  image-rendering: -o-crisp-edges;   
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
 .canvasBoard canvas:first-child {
   background-color: rgba(255, 255, 255, .2);
 }

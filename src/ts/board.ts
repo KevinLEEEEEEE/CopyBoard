@@ -1,7 +1,7 @@
 
 export default class Board {
-  private readonly canvas: HTMLCanvasElement;
-  private readonly ctx: CanvasRenderingContext2D;
+  private canvas: HTMLCanvasElement;
+  private ctx: CanvasRenderingContext2D;
   private name: string;
   private width: number = 0;
   private height: number = 0;
@@ -59,19 +59,19 @@ export default class Board {
     this.name = name;
   }
 
-  public setWidth(width: number) {
+  public setWidth(width: number): void {
     this.width = width;
 
     this.canvas.width = width;
   }
 
-  public setHeight(height: number) {
+  public setHeight(height: number): void {
     this.height = height;
 
     this.canvas.height = height;
   }
 
-  public setStyleWidth(width: number) {
+  public setStyleWidth(width: number): void {
     this.cssWidth = width;
 
     window.requestAnimationFrame(() => {
@@ -79,12 +79,16 @@ export default class Board {
     });
   }
 
-  public setStyleHeight(height: number) {
+  public setStyleHeight(height: number): void {
     this.cssHeight = height;
 
     window.requestAnimationFrame(() => {
       this.canvas.style.height = height + "px";
     });
+  }
+
+  public setFillColor(hex: string): void {
+    this.ctx.fillStyle = hex;
   }
 
   public setCanvasParentNode(parentNode: HTMLElement): void {
@@ -97,7 +101,19 @@ export default class Board {
     this.ctx.drawImage(image, x, y, width, height);
   }
 
-  public drawImageData(imageData: ImageData) {
+  public drawImageData(imageData: ImageData): void {
     this.ctx.putImageData(imageData, 0, 0);
+  }
+
+  public fillContentRect(x: number, y: number, width: number, height: number): void {
+    this.ctx.fillRect(x, y, width, height);
+  }
+
+  public clearContentRect(x: number, y: number, width: number, height: number): void {
+    this.ctx.clearRect(x, y, width, height);
+  }
+
+  public clearContentLayer(): void {
+    this.ctx.clearRect(0, 0, this.width, this.height);
   }
 }

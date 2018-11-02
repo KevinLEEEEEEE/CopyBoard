@@ -32,15 +32,15 @@ export default class FileInput {
   // -----------------------------------------------------------------------------------------
 
   private attachInputEvents(): void {
-    this.fileInputNode.addEventListener("dragover", this.preventAndStop);
+    this.fileInputNode.addEventListener("dragover", this.preventAndStop, true);
 
-    this.fileInputNode.addEventListener("drop", this.drop);
+    this.fileInputNode.addEventListener("drop", this.drop, true);
   }
 
   private removeInputEvents() {
-    this.fileInputNode.removeEventListener("dragover", this.preventAndStop);
+    this.fileInputNode.removeEventListener("dragover", this.preventAndStop, true);
 
-    this.fileInputNode.removeEventListener("drop", this.drop);
+    this.fileInputNode.removeEventListener("drop", this.drop, true);
   }
 
   private preventAndStop = (e): void => {

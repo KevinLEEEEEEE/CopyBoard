@@ -13,7 +13,7 @@ export default class Main {
   constructor() {
     const colorDialParentNode: HTMLElement = document.getElementById("colorDialEventsLayer");
     const fileInputDetectNode: HTMLElement = document.getElementById("main");
-    const canvasBoardNode: HTMLElement = document.getElementById("canvasBoard");
+    const canvasBoardParentNode: HTMLElement = document.getElementById("canvasBoard");
     const pipelineParentNode: HTMLElement = document.getElementById("pipeline");
 
     this.colorDial = new ColorDial(colorDialParentNode);
@@ -22,7 +22,7 @@ export default class Main {
 
     this.outputPanel = new OutputPanel(pipelineParentNode);
 
-    this.canvasBoard = new CanvasBoard("canvas", canvasBoardNode);
+    this.canvasBoard = new CanvasBoard("canvas", canvasBoardParentNode);
   }
 
   public init() {
@@ -38,16 +38,16 @@ export default class Main {
   private initComponents(): void {
     this.colorDial.init();
 
+    this.colorDial.registerEvents(this.handleColorChange);
+
     this.fileInput.init();
 
-    this.fileInput.registerEvents(this.handleFile.bind(this));
+    this.fileInput.registerEvents(this.handleFile);
 
-    this.outputPanel.init();
-
-    this.canvasBoard.init();
+    this.canvasBoard.init(this.colorDial, this.outputPanel);
   }
 
-  private handleFile(base64: string, name: string): void {
+  private handleFile = (base64: string, name: string): void => {
     this.addReferencrBoard(base64, name);
   }
 
@@ -63,5 +63,9 @@ export default class Main {
     const [r, g, b] = rgba;
 
     this.colorDial.setRGBColor(r, g, b);
+  }
+
+  private handleColorChange = (hex: string) => {
+    this.canvasBoard.setFillColor(hex);
   }
 }

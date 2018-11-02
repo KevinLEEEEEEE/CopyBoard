@@ -7,14 +7,26 @@ export default class OutputPanel {
     this.parentNode = parentNode;
   }
 
-  public init(): void {
-    const i = new Pipeline(this.parentNode);
-    const data = new Uint8ClampedArray([
-      0, 0, 0, 0, 1, 1, 1, 1,
-      2, 2, 2, 2, 3, 3, 3, 3,
-    ]);
-    const imageData = new ImageData(data, 2, 2);
+  public init(imageData: ImageData): void {
+    const pipeline = new Pipeline(this.parentNode);
 
-    i.init(imageData);
+    pipeline.init(imageData);
+
+    this.displayOutputPanel();
+
+    this.drawImageDataOnCavas(imageData);
+  }
+
+  private displayOutputPanel(): void {
+    const outputPanel = document.getElementById("output");
+
+    outputPanel.classList.add("outputDisplay");
+  }
+
+  private drawImageDataOnCavas(imageData: ImageData): void {
+    const outputCanvas: any = document.getElementById("outputCanvas");
+    const ctx: CanvasRenderingContext2D = outputCanvas.getContext("2d");
+
+    ctx.putImageData(imageData, 0, 0);
   }
 }

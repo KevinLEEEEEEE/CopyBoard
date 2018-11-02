@@ -2,12 +2,15 @@ import { colorDialTemplate, IColorDialTemplate } from "./templates/colorDialTemp
 import ColorConversion from "./utils/colorConversion";
 import Log from "./utils/log/log";
 
+type IRegisterFunc = (hex: string) => void;
+
 const COLORDIAL_NODE_WIDTH = 100;
 const COLORDIAL_NODE_HEIGHT = 100;
 
 export default class ColorDial {
   private readonly dialDomsPackage: IColorDialTemplate;
   private readonly colorConversion: ColorConversion;
+  private inputEventListeners: IRegisterFunc[] = [];
   private readonly parentNode: HTMLElement;
   private currentColor: string = "#000000";
   private clickOffsetPos: number[] = [0, 0];
@@ -60,15 +63,25 @@ export default class ColorDial {
   public setRGBColor(r: number, g: number, b: number): void {
     const hex: string = this.colorConversion.rgbToHex(r, g, b);
 
-    console.log(r, g, b);
-
     this.setHexColor(hex);
   }
 
-  public setHexColor(hex: string): void {
+  public setHexColor(hex: string) {
     this.currentColor = hex;
 
     this.updateInputDisplay();
+
+    this.informEventListeners();
+  }
+
+  public registerEvents(func: IRegisterFunc): void {
+    this.inputEventListeners.push(func);
+  }
+
+  private informEventListeners(): void {
+    this.inputEventListeners.forEach((listener) => {
+      listener(this.currentColor);
+    });
   }
 
   // -----------------------------------------------------------------------------------------
@@ -209,6 +222,8 @@ export default class ColorDial {
     this.currentColor = currentColor;
 
     this.updateInputDisplay();
+
+    this.informEventListeners();
   }
 
   private updateInputDisplay() {

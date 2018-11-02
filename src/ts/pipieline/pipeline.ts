@@ -15,6 +15,7 @@ class Pipeline {
   private readyToDelete: symbol[] = [];
   private componentNodes: IPipelineComponents;
   private parentNode: HTMLElement;
+  private isChanged: boolean = false;
   private imageData: ImageData;
   private logger: Logger;
 
@@ -25,13 +26,13 @@ class Pipeline {
   public init(imageData: ImageData): void {
     this.imageData = imageData;
 
-    this.logger = new Logger();
-
     this.attachPipeEvents();
 
     this.getComponentBtnNodes();
 
     this.attachComponentBtnEvents();
+
+    this.logger = new Logger();
   }
 
   public delete(): void {
@@ -42,6 +43,13 @@ class Pipeline {
 
   public setImageData(imageData: ImageData) {
     this.imageData = imageData;
+
+    this.isChanged = true;
+
+    this.runPipeline(imageData)
+    .then((data) => {
+      this.isChanged = false;
+    });
   }
 
   private getComponentBtnNodes(): void {
@@ -77,7 +85,7 @@ class Pipeline {
   }
 
   private async runPipeline(imageData: ImageData): Promise<ImageData> {
-    const defaultValue = Promise.resolve({ imageData, isChanged: false });
+    const defaultValue = Promise.resolve({ imageData, isChanged: this.isChanged });
 
     const outputData = await this.pipeFlow.reduce((prev, current) => {
       const { component } = this.pipeLut[current];
