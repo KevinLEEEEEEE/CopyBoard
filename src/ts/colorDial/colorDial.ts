@@ -1,8 +1,5 @@
-import { colorDialTemplate, IColorDialTemplate } from "./templates/colorDialTemplate";
-import ColorConversion from "./utils/colorConversion";
-import Log from "./utils/log/log";
-
-type IRegisterFunc = (hex: string) => void;
+import { colorDialTemplate, IColorDialTemplate } from "../templates/colorDialTemplate";
+import Log from "../utils/log/log";
 
 const COLORDIAL_NODE_WIDTH = 100;
 const COLORDIAL_NODE_HEIGHT = 100;
