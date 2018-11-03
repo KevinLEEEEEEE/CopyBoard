@@ -27,6 +27,7 @@ module.exports = {
   output: {
     filename: 'assets/js/[name].bundle.js',
     path: path.resolve(__dirname, 'dist'),
+    globalObject: 'this',
   },
   module: {
     rules: [
@@ -79,6 +80,12 @@ module.exports = {
           'xml-loader',
         ],
       },
+      {
+        test: /\.worker.js$/,
+        use: [
+          'worker-loader'
+        ]
+      }
     ]
   },
   resolve: {

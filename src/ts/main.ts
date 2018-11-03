@@ -1,8 +1,10 @@
 import CanvasBoard from "./canvasBoard";
-import ColorDial from "./colorDial";
+// import ColorDial from "./colorDial";
+import { ColorDial } from "./components/colorDial";
+// import ReferenceBoard from "./referenceBoard";
+import ReferenceBoard from "./components/refBoard";
 import FileInput from "./fileInput";
 import OutputPanel from "./outputPanel";
-import ReferenceBoard from "./referenceBoard";
 
 export default class Main {
   private colorDial: ColorDial;
@@ -38,7 +40,7 @@ export default class Main {
   private initComponents(): void {
     this.colorDial.init();
 
-    this.colorDial.registerEvents(this.handleColorChange);
+    // this.colorDial.registerEvents(this.handleColorChange);
 
     this.fileInput.init();
 
@@ -53,7 +55,7 @@ export default class Main {
 
   private addReferencrBoard(base64: string, name: string): void {
     const parentNode: HTMLElement = document.getElementById("main");
-    const referenceBoard = new ReferenceBoard(name, parentNode);
+    const referenceBoard = new ReferenceBoard(name, parentNode, this.colorDial);
 
     referenceBoard.init(base64);
   }
@@ -62,7 +64,7 @@ export default class Main {
     const { rgba } = e.detail;
     const [r, g, b] = rgba;
 
-    this.colorDial.setRGBColor(r, g, b);
+    // this.colorDial.setRGBColor(r, g, b);
   }
 
   private handleColorChange = (hex: string) => {

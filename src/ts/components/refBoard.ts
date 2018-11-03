@@ -1,8 +1,9 @@
+import { IRGB, RGB } from "../cores/color/rgb";
+import Pixelate from "../cores/pixelate/pixelate";
+import { IReferenceTemplate, referenceTemplate } from "../templates/referenceTemplate";
+import Log from "../utils/log/log";
 import Board from "./board";
-import Pixelate from "./cores/pixelate/pixelate";
-import { IReferenceTemplate, referenceTemplate } from "./templates/referenceTemplate";
-import ColorChangeEventEmitter from "./utils/colorChangeEventEmitter";
-import Log from "./utils/log/log";
+import { IColorChange } from "./colorDial";
 
 const REFERENCE_CONTROLLER_HEIGHT = 70;
 const DEFAULT_SCALE_RATIO = 0.005;
@@ -17,10 +18,10 @@ const enum STATE {
 }
 
 export default class ReferenceBoard extends Board {
-  private readonly colorChangeEventEmitter: ColorChangeEventEmitter;
   private readonly refDomsPackage: IReferenceTemplate;
   private readonly parentNode: HTMLElement;
-  private pixelateInstance: Pixelate;
+  private colorDial: IColorChange;
+  private pixelate: Pixelate;
   private clickOffsetPos: number[] = [0, 0];
   private clickPagePos: number[] = [0, 0];
   private tmpBoardSize: number[] = [0, 0];
@@ -30,14 +31,14 @@ export default class ReferenceBoard extends Board {
   private state: STATE;
   private logger: Log;
 
-  constructor(name: string, parentNode: HTMLElement) {
+  constructor(name: string, parentNode: HTMLElement, colorDial: IColorChange) {
     super(name);
+
+    this.colorDial = colorDial;
 
     this.parentNode = parentNode;
 
     this.refDomsPackage = referenceTemplate();
-
-    this.colorChangeEventEmitter = new ColorChangeEventEmitter(parentNode);
 
     this.initStateMachine();
 
@@ -155,7 +156,7 @@ export default class ReferenceBoard extends Board {
   private initPixelatedUtils() {
     const imageData = this.getImageData();
 
-    this.pixelateInstance = new Pixelate(imageData);
+    this.pixelate = new Pixelate(imageData);
   }
 
   private appendSelfToParentNode(): void {
@@ -525,7 +526,7 @@ export default class ReferenceBoard extends Board {
 
     cvsContainer.addEventListener("contextmenu", this.contextmenu, true);
 
-    pixelateBtn.addEventListener("click", this.pixelate, true);
+    pixelateBtn.addEventListener("click", this.pixelateActive, true);
 
     pixelateInput.addEventListener("blur", this.pixelateBlur, true);
 
@@ -541,7 +542,7 @@ export default class ReferenceBoard extends Board {
 
     cvsContainer.removeEventListener("contextmenu", this.contextmenu, true);
 
-    pixelateBtn.removeEventListener("click", this.pixelate, true);
+    pixelateBtn.removeEventListener("click", this.pixelateActive, true);
 
     pixelateInput.removeEventListener("blur", this.pixelateBlur, true);
 
@@ -559,9 +560,10 @@ export default class ReferenceBoard extends Board {
 
     if (e.button !== 2) {
       const { offsetX, offsetY } = e;
-      const rgba = this.getColorAt(offsetX, offsetY);
+      const [r, g, b] = this.getColorAt(offsetX, offsetY);
+      const rgb: IRGB = { r, g, b };
 
-      this.colorChangeEventEmitter.emitColorChangeEvents(rgba);
+      this.colorDial.changeColor(new RGB(rgb));
     }
 
     this.state = STATE.default;
@@ -572,7 +574,7 @@ export default class ReferenceBoard extends Board {
     e.stopPropagation();
   }
 
-  private pixelate = (): void => {
+  private pixelateActive = (): void => {
     this.updatePixelateInputAndBtn();
 
     this.focusAndSelectPixelateInput();
@@ -612,7 +614,7 @@ export default class ReferenceBoard extends Board {
   }
 
   private pixelateContentCanvas(pixelSize: number): void {
-    this.pixelateInstance.getPixelatedImageData(pixelSize, pixelSize)
+    this.pixelate.getPixelatedImageData(pixelSize, pixelSize)
     .then((imageData) => {
       this.drawImageData(imageData);
     });

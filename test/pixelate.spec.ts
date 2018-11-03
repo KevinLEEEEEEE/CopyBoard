@@ -1,23 +1,25 @@
 import { expect } from "chai";
-import Pixelate from "../src/ts/cores/pixelate";
+import PixelBlock from "../src/ts/cores/pixelate/pixelBlock";
 
 describe("pixelate", () => {
-  describe("default 16 * 16 array", () => {
-    it("defsult test", () => {
-      const data = new Uint8ClampedArray([
-        1, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
-        0, 2, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
-        0, 0, 3, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
-        0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
-        0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
-        0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
-        0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
-        0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
-      ]);
-      const imageData = new ImageData(data, 4, 4);
-      // const pixelate = new Pixelate(imageData);
+  it("pixelBlock", () => {
+    const array = new Uint8ClampedArray([
+      0, 0, 0, 255, 1, 1, 1, 255,
+      2, 2, 2, 255, 3, 3, 3, 255,
+    ]);
+    const imageData = {
+      data: array,
+      width: 2,
+      height: 2,
+    };
 
-      // pixelate.getPixelatedImageData(2, 2);
-    });
+    const pixelate = new PixelBlock({ imageData, pixelBlockWidth: 2, pixelBlockHeight: 2 });
+
+    // const pixelatedData = pixelate.getPixelatedImageData(2, 2);
+
+    // expect(pixelatedData).to.deep.equal([
+    //   1.25, 1.25, 1.25, 255, 1.25, 1.25, 1.25, 255,
+    //   1.25, 1.25, 1.25, 255, 1.25, 1.25, 1.25, 255,
+    // ]);
   });
 });

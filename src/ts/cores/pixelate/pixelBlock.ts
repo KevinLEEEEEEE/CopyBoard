@@ -1,6 +1,6 @@
 const SIZEOF_RGBA = 4; // [r, g, b, a]
 
-class PixelBlock {
+export default class PixelBlock {
   public readonly imageData: ImageData;
   private readonly pixelBlockWidth: number;
   private readonly pixelBlockHeight: number;
@@ -79,64 +79,3 @@ class PixelBlock {
     return [x, y];
   }
 }
-
-const isArrayEqual = (array1: any[], array2: any[]): boolean => {
-  if (array1.length !== array2.length) {
-    return false;
-  }
-
-  for (let i = 0, j = array1.length; i < j; i += 1) {
-    if (array1[i] instanceof Array && array2[i] instanceof Array) {
-      if (!array1[i].equals(array2[i])) {
-        return false;
-      }
-    }
-
-    if (array1[i] !== array2[i]) {
-      return false;
-    }
-  }
-
-  return true;
-};
-
-const computeArrayAverage = (array: number[]): number[] => {
-  const combinedArray = array.reduce((prev, current) => {
-    return prev.map((prevValue, index) => prevValue + current[index]);
-  }, [0, 0, 0]);
-
-  const averageArray = combinedArray.map((data) => data / array.length);
-
-  return averageArray;
-};
-
-onmessage = (event) => {
-  const pixelBlock = new PixelBlock(event.data);
-  const pixelBlockAmount = pixelBlock.getPixelBlockAmount();
-  const pixelBlockSize = pixelBlock.getPixelBlockSize();
-
-  for (let indexOfBlock = 0; indexOfBlock < pixelBlockAmount; indexOfBlock += 1) {
-    const colorDataInPixelBlock = [];
-    const pointsInPixelBlock = [];
-
-    for (let indexInBlock = 0; indexInBlock < pixelBlockSize; indexInBlock += 1) {
-      const [x, y] = pixelBlock.getPointByBlockIndex(indexOfBlock, indexInBlock);
-      const rgb = pixelBlock.getRGBInPoint(x, y);
-
-      if (!isArrayEqual(rgb, [])) {
-        colorDataInPixelBlock.push(rgb);
-        pointsInPixelBlock.push([x, y]);
-      }
-    }
-
-    const combinedColorData = computeArrayAverage(colorDataInPixelBlock);
-
-    pointsInPixelBlock.forEach((point) => {
-      pixelBlock.setRGBInPoint(point[0], point[1], combinedColorData);
-    });
-  }
-
-  postMessage({
-    imageData: pixelBlock.imageData,
-  });
-};
