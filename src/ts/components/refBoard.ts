@@ -1,5 +1,5 @@
 import { RGB } from "../cores/color/rgb";
-import Pixelate from "../cores/pixelate/pixelate";
+import { IPixelateInput, Pixelate } from "../cores/pixelate/pixelate";
 import { IReferenceTemplate, referenceTemplate } from "../templates/referenceTemplate";
 import Log from "../utils/log/log";
 import Board from "./board";
@@ -30,15 +30,16 @@ interface IMouseOffsetPosition {
 export default class ReferenceBoard extends Board {
   private readonly refDomsPackage: IReferenceTemplate;
   private readonly parentNode: HTMLElement;
+  private readonly colorDial: IColorChange;
+  private readonly pixelate: Pixelate;
   private mouseOffsetPosition: IMouseOffsetPosition;
   private windowSize: IWindowSize = window;
   private currentScaleRatio: number;
+  private imageData: ImageData;
   private isPixelateProcessing: boolean = false;
   private isPixelateFocused: boolean = false;
   private isOpacityFocused: boolean = false;
   private isLocked: boolean = false;
-  private colorDial: IColorChange;
-  private pixelate: Pixelate;
   private state: STATE;
   private logger: Log;
 
@@ -48,6 +49,8 @@ export default class ReferenceBoard extends Board {
     this.colorDial = colorDial;
 
     this.parentNode = parentNode;
+
+    this.pixelate = new Pixelate();
 
     this.refDomsPackage = referenceTemplate();
 
@@ -77,7 +80,7 @@ export default class ReferenceBoard extends Board {
 
         this.updateCurrentScaleRatio();
 
-        this.initPixelatedUtils();
+        this.imageData = this.getImageData();
 
         this.setCanvasParentNode(this.refDomsPackage.cvsContainer);
 
@@ -156,7 +159,7 @@ export default class ReferenceBoard extends Board {
     this.drawImage(img, 0, 0, width, height);
   }
 
-  private scaleImageToFitTheParentSize(img: HTMLImageElement): void {
+  private scaleImageToFitTheParentSize(img: HTMLImageElement): void { // update required
     let { width, height } = img;
     const { clientWidth } = this.parentNode;
     const limitedWidth = clientWidth / WIDTH_LIMITAION_RATIO;
@@ -170,12 +173,6 @@ export default class ReferenceBoard extends Board {
     this.setStyleWidth(width);
 
     this.setStyleHeight(height);
-  }
-
-  private initPixelatedUtils() {
-    const imageData = this.getImageData();
-
-    this.pixelate = new Pixelate(imageData);
   }
 
   private appendSelfToParentNode(): void {
@@ -247,13 +244,13 @@ export default class ReferenceBoard extends Board {
   // -----------------------------------------------------------------------------------------
 
   private attachMoveEvents(): void {
-    const { cvsContainer } = this.refDomsPackage;
+    const { referenceBoard } = this.refDomsPackage;
 
-    cvsContainer.addEventListener("mousedown", this.mousedown, true);
+    referenceBoard.addEventListener("mousedown", this.mousedown);
 
-    cvsContainer.addEventListener("mousemove", this.mousemove, true);
+    referenceBoard.addEventListener("mousemove", this.mousemove);
 
-    cvsContainer.addEventListener("mouseup", this.mouseup, true);
+    referenceBoard.addEventListener("mouseup", this.mouseup);
 
     this.parentNode.addEventListener("mousemove", this.mousemove, true);
 
@@ -697,7 +694,7 @@ export default class ReferenceBoard extends Board {
       throw new Error("please enter number");
     }
 
-    if (pixelSize < 1 || pixelSize > this.getWidth() || pixelSize > this.getHeight()) {
+    if (pixelSize < 1) {
       throw new Error("out of the range of pixel size");
     }
 
@@ -712,9 +709,20 @@ export default class ReferenceBoard extends Board {
   private pixelateContentCanvas(pixelSize: number): void {
     this.isPixelateProcessing = true;
 
-    this.pixelate.getPixelatedImageData(pixelSize, pixelSize)
+    const pixelateInput: IPixelateInput = {
+      imageData: this.imageData,
+      widthPerPixel: pixelSize,
+      heightPerPixel: pixelSize,
+    };
+
+    this.pixelate.getPixelatedImageData(pixelateInput)
       .then((imageData) => {
         this.drawImageData(imageData);
+
+        this.isPixelateProcessing = false;
+      })
+      .catch((err) => {
+        this.logger.error(err);
 
         this.isPixelateProcessing = false;
       });

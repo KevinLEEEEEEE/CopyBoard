@@ -1,15 +1,18 @@
 import PixelateWorker = require("worker-loader?name=dist/[name].js!./pixelate.worker");
 import Logger from "../../utils/log/log";
 
-export default class Pixelate {
+interface IPixelateInput {
+  imageData: ImageData;
+  widthPerPixel: number;
+  heightPerPixel: number;
+}
+
+class Pixelate {
   private readonly pixelateWorker: Worker;
-  private readonly imageData;
   private readonly logger: Logger;
 
-  constructor(imageData: ImageData) {
+  constructor() {
     this.pixelateWorker = new PixelateWorker();
-
-    this.imageData = imageData;
 
     this.logger = new Logger();
   }
@@ -19,13 +22,7 @@ export default class Pixelate {
    * @param pixelBlockWidth
    * @param pixelBlockHeight
    */
-  public getPixelatedImageData(pixelBlockWidth: number = 1, pixelBlockHeight: number = 1): Promise<ImageData> {
-    const data = {
-      imageData: this.imageData,
-      pixelBlockWidth,
-      pixelBlockHeight,
-    };
-
+  public getPixelatedImageData(pixelateInput: IPixelateInput): Promise<ImageData> {
     return new Promise((resolve, reject) => {
       this.pixelateWorker.addEventListener("message", (message) => {
         this.logger.info("run pixelate process successfully");
@@ -37,12 +34,12 @@ export default class Pixelate {
         reject(err);
       });
 
-      this.pixelateWorker.postMessage(data);
-    })
-      .catch((err) => {
-        this.logger.error("error with pixelate process, return original imageData", err);
-
-        return this.imageData;
-      });
+      this.pixelateWorker.postMessage(pixelateInput);
+    });
   }
 }
+
+export {
+  Pixelate,
+  IPixelateInput,
+};

@@ -1,5 +1,5 @@
 import Board from "./board";
-import Pixelate from "./cores/pixelate/pixelate";
+// import Pixelate from "./cores/pixelate/pixelate";
 import { IReferenceTemplate, referenceTemplate } from "./templates/referenceTemplate";
 import ColorChangeEventEmitter from "./utils/colorChangeEventEmitter";
 import Log from "./utils/log/log";
@@ -20,7 +20,7 @@ export default class ReferenceBoard extends Board {
   private readonly colorChangeEventEmitter: ColorChangeEventEmitter;
   private readonly refDomsPackage: IReferenceTemplate;
   private readonly parentNode: HTMLElement;
-  private pixelateInstance: Pixelate;
+  // private pixelateInstance: Pixelate;
   private clickOffsetPos: number[] = [0, 0];
   private clickPagePos: number[] = [0, 0];
   private tmpBoardSize: number[] = [0, 0];
@@ -155,7 +155,7 @@ export default class ReferenceBoard extends Board {
   private initPixelatedUtils() {
     const imageData = this.getImageData();
 
-    this.pixelateInstance = new Pixelate(imageData);
+    // this.pixelateInstance = new Pixelate(imageData);
   }
 
   private appendSelfToParentNode(): void {
@@ -612,10 +612,10 @@ export default class ReferenceBoard extends Board {
   }
 
   private pixelateContentCanvas(pixelSize: number): void {
-    this.pixelateInstance.getPixelatedImageData(pixelSize, pixelSize)
-    .then((imageData) => {
-      this.drawImageData(imageData);
-    });
+    // this.pixelateInstance.getPixelatedImageData(pixelSize, pixelSize)
+    // .then((imageData) => {
+    //   this.drawImageData(imageData);
+    // });
   }
 
   private updatePixelateInputAndBtn(): void {

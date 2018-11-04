@@ -1,7 +1,6 @@
 import { expect } from "chai";
 import { Hex, IHex } from "../src/ts/cores/color/hex";
 import { IRGB, RGB } from "../src/ts/cores/color/rgb";
-import Pixelate from "../src/ts/cores/pixelate/pixelate";
 
 describe("color", () => {
   describe("rgb color", () => {
