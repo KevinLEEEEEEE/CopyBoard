@@ -1,4 +1,4 @@
-import createAndAppend from "../utils/createAndAppend";
+import { createAndAppend } from "../utils";
 
 interface IReferenceTemplate {
   referenceBoard: HTMLDivElement;

@@ -101,3 +101,11 @@
 .unlock {
   background-image: url('../image/icons/unlock.png');
 }
+
+.noPointerEventsForChildren>div {
+  pointer-events: none;
+}
+
+.reservePointerEventsForSelf {
+  pointer-events: initial !important;
+}

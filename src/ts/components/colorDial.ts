@@ -1,5 +1,5 @@
+import Color from "../cores/color/color";
 import { Hex } from "../cores/color/hex";
-import { RGB } from "../cores/color/rgb";
 import Log from "../utils/log/log";
 import { colorDialTemplate, IColorDialTemplate } from "./templates/colorDialTemplate";
 
@@ -9,7 +9,7 @@ const enum STATE {
 }
 
 interface IColorChange {
-  changeColor(color: Hex | RGB): void;
+  changeColor(color: Color): void;
 }
 
 interface IWindowSize {
@@ -31,7 +31,7 @@ class ColorDial implements IColorChange {
   private readonly dialDomsPackage: IColorDialTemplate;
   private readonly parentNode: HTMLElement;
   private readonly logger: Log;
-  private currentColor: Hex | RGB = new Hex({ hex: "#ffffff" });
+  private currentColor: Color = new Hex({ hex: "#ffffff" });
   private mouseOffsetPosition: IMouseOffsetPosition;
   private windowSize: IWindowSize = window;
   private state: STATE = STATE.default;
@@ -70,7 +70,7 @@ class ColorDial implements IColorChange {
     this.removeSelfFromParentNode();
   }
 
-  public changeColor(color: Hex | RGB): void {
+  public changeColor(color: Color): void {
     this.logger.info("color change from other panel");
 
     this.changeCurrentColor(color);
@@ -95,12 +95,6 @@ class ColorDial implements IColorChange {
 
     colorDial.addEventListener("mouseup", this.mouseup, true);
 
-    colorDial.addEventListener("drop", this.preventAndStop, true);
-
-    colorDial.addEventListener("dragover", this.preventAndStop, true);
-
-    colorDial.addEventListener("contextmenu", this.preventAndStop, true);
-
     this.parentNode.addEventListener("mousemove", this.mousemove, true);
 
     this.parentNode.addEventListener("mouseup", this.mouseup, true);
@@ -114,12 +108,6 @@ class ColorDial implements IColorChange {
     colorDial.removeEventListener("mousemove", this.mousemove, true);
 
     colorDial.removeEventListener("mouseup", this.mouseup, true);
-
-    colorDial.removeEventListener("drop", this.preventAndStop, true);
-
-    colorDial.removeEventListener("dragover", this.preventAndStop, true);
-
-    colorDial.removeEventListener("contextmenu", this.preventAndStop, true);
 
     this.parentNode.removeEventListener("mousemove", this.mousemove, true);
 
@@ -166,11 +154,6 @@ class ColorDial implements IColorChange {
     this.updateDetectLayer();
   }
 
-  private preventAndStop(e): void {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-
   private canAcceptMousedown(target: HTMLElement): boolean {
     return target.isSameNode(this.dialDomsPackage.colorDial) && this.state === STATE.default;
   }
@@ -186,11 +169,11 @@ class ColorDial implements IColorChange {
   private updateDetectLayer(): void {
     switch (this.state) {
       case STATE.default:
-      this.parentNode.classList.add("noPointerEvents");
-      break;
+        this.parentNode.classList.add("noPointerEvents");
+        break;
       case STATE.move:
-      this.parentNode.classList.remove("noPointerEvents");
-      break;
+        this.parentNode.classList.remove("noPointerEvents");
+        break;
       default:
     }
   }
@@ -271,7 +254,7 @@ class ColorDial implements IColorChange {
     this.logger.info("color change from colorDial input change");
   }
 
-  private changeCurrentColor(color: Hex | RGB): void {
+  private changeCurrentColor(color: Color): void {
     this.currentColor = color;
 
     this.updateInputDisplay();
@@ -288,17 +271,38 @@ class ColorDial implements IColorChange {
   // -----------------------------------------------------------------------------------------
 
   private attachUtilsEvents() {
+    const { colorDial } = this.dialDomsPackage;
+
     window.addEventListener("resize", this.windowResize, true);
+
+    colorDial.addEventListener("drop", this.preventAndStop, true);
+
+    colorDial.addEventListener("dragover", this.preventAndStop, true);
+
+    colorDial.addEventListener("contextmenu", this.preventAndStop, true);
   }
 
   private removeUtilsEvents() {
+    const { colorDial } = this.dialDomsPackage;
+
     window.removeEventListener("resize", this.windowResize, true);
+
+    colorDial.removeEventListener("drop", this.preventAndStop, true);
+
+    colorDial.removeEventListener("dragover", this.preventAndStop, true);
+
+    colorDial.removeEventListener("contextmenu", this.preventAndStop, true);
   }
 
   private windowResize = (): void => {
     this.windowSize = window;
 
     this.moveColorDialWithinClientScope();
+  }
+
+  private preventAndStop = (e): void => {
+    e.preventDefault();
+    e.stopPropagation();
   }
 }
 

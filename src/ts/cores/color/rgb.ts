@@ -7,17 +7,21 @@ interface IRGB {
   b: number;
 }
 
-class RGB extends Color<IRGB> {
+class RGB extends Color {
+  private rgb: IRGB;
+
   constructor(rgb: IRGB) {
-    super(rgb);
+    super();
+
+    this.rgb = this.validate(rgb);
   }
 
   public getRGB(): IRGB {
-    return this.color;
+    return this.rgb;
   }
 
   public getHex(): IHex {
-    return this.rgbToHex(this.color);
+    return this.rgbToHex(this.rgb);
   }
 
   public validate({ r, g, b }: IRGB): IRGB {

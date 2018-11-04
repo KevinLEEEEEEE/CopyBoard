@@ -1,3 +1,12 @@
+#refBoardContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: initial;
+}
+
 .referenceBoard .rightPanel>div:hover {
   background-color: rgba(0, 0, 0, .5);
 }

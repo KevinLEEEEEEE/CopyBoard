@@ -1,4 +1,4 @@
-import { IRGB, RGB } from "../cores/color/rgb";
+import { RGB } from "../cores/color/rgb";
 import Pixelate from "../cores/pixelate/pixelate";
 import { IReferenceTemplate, referenceTemplate } from "../templates/referenceTemplate";
 import Log from "../utils/log/log";
@@ -11,23 +11,34 @@ const WIDTH_LIMITAION_RATIO = 3;
 const MIN_BOARD_WIDTH = 300;
 const OPACITY_RATIO = 0.6;
 const enum STATE {
-  default = "default",
-  move = "move",
-  scale = "scale",
-  pickColor = "pickColor",
+  default,
+  move,
+  scale,
+  pickColor,
+}
+
+interface IWindowSize {
+  innerWidth: number;
+  innerHeight: number;
+}
+
+interface IMouseOffsetPosition {
+  offsetX: number;
+  offsetY: number;
 }
 
 export default class ReferenceBoard extends Board {
   private readonly refDomsPackage: IReferenceTemplate;
   private readonly parentNode: HTMLElement;
-  private colorDial: IColorChange;
-  private pixelate: Pixelate;
-  private clickOffsetPos: number[] = [0, 0];
-  private clickPagePos: number[] = [0, 0];
-  private tmpBoardSize: number[] = [0, 0];
+  private mouseOffsetPosition: IMouseOffsetPosition;
+  private windowSize: IWindowSize = window;
+  private currentScaleRatio: number;
+  private isPixelateProcessing: boolean = false;
   private isPixelateFocused: boolean = false;
   private isOpacityFocused: boolean = false;
   private isLocked: boolean = false;
+  private colorDial: IColorChange;
+  private pixelate: Pixelate;
   private state: STATE;
   private logger: Log;
 
@@ -50,17 +61,21 @@ export default class ReferenceBoard extends Board {
    * @param base64
    */
   public init(base64: string): void {
-    this.attachMoveEvents();
-
-    this.attachLayerBtnEvents();
-
-    this.attachSettingBtnEvents();
-
-    this.attachToolsBtnEvents();
-
     this.convertBase64ToImage(base64)
       .then((img) => {
+        this.attachMoveEvents();
+
+        this.attachLayerBtnEvents();
+
+        this.attachSettingBtnEvents();
+
+        this.attachToolsBtnEvents();
+
+        this.attachUtilsEvents();
+
         this.displayImageOnCanvas(img);
+
+        this.updateCurrentScaleRatio();
 
         this.initPixelatedUtils();
 
@@ -70,8 +85,6 @@ export default class ReferenceBoard extends Board {
 
         this.logger.info("reference board init successfully");
       }, (err) => {
-        this.delete();
-
         this.logger.error("fail to convert base64 to image", err);
       });
   }
@@ -87,6 +100,8 @@ export default class ReferenceBoard extends Board {
     this.removeSettingBtnEvents();
 
     this.removeToolsBtnEvents();
+
+    this.removeUtilsEvents();
 
     this.removeSelfFromParentNode();
   }
@@ -119,6 +134,10 @@ export default class ReferenceBoard extends Board {
         that.updateCursorStyle(this._state, state);
 
         this._state = state;
+
+        that.updateRefBoardNodeZIndex();
+
+        that.updateDetectLayer();
       },
     });
 
@@ -178,14 +197,50 @@ export default class ReferenceBoard extends Board {
 
     switch (state) {
       case STATE.move:
-      cvsContainer.classList.toggle("cursorMove");
-      break;
+        cvsContainer.classList.toggle("cursorMove");
+        break;
       case STATE.scale:
-      cvsContainer.classList.toggle("cursorResize");
-      break;
+        cvsContainer.classList.toggle("cursorResize");
+        break;
       case STATE.pickColor:
-      cvsContainer.classList.toggle("cursorCrossHair");
-      break;
+        cvsContainer.classList.toggle("cursorCrossHair");
+        break;
+    }
+  }
+
+  private updateRefBoardNodeZIndex(): void {
+    const { referenceBoard } = this.refDomsPackage;
+
+    switch (this.state) {
+      case STATE.default:
+      case STATE.pickColor:
+        referenceBoard.classList.remove("tmpTopLayer");
+        break;
+      case STATE.move:
+      case STATE.scale:
+        referenceBoard.classList.add("tmpTopLayer");
+        break;
+    }
+  }
+
+  private updateDetectLayer(): void {
+    const { referenceBoard } = this.refDomsPackage;
+    const parentNode = this.parentNode;
+
+    switch (this.state) {
+      case STATE.default:
+      case STATE.pickColor:
+        parentNode.classList.add("noPointerEvents");
+        parentNode.classList.add("initialPointerEventsForChildren");
+        referenceBoard.classList.remove("initialPointerEvents");
+        break;
+      case STATE.move:
+      case STATE.scale:
+        parentNode.classList.remove("noPointerEvents");
+        parentNode.classList.remove("initialPointerEventsForChildren");
+        referenceBoard.classList.add("initialPointerEvents");
+        break;
+      default:
     }
   }
 
@@ -200,7 +255,9 @@ export default class ReferenceBoard extends Board {
 
     cvsContainer.addEventListener("mouseup", this.mouseup, true);
 
-    cvsContainer.addEventListener("mouseleave", this.mouseup, true);
+    this.parentNode.addEventListener("mousemove", this.mousemove, true);
+
+    this.parentNode.addEventListener("mouseup", this.mousemove, true);
   }
 
   private removeMoveEvents(): void {
@@ -213,106 +270,109 @@ export default class ReferenceBoard extends Board {
     cvsContainer.removeEventListener("mouseup", this.mouseup, true);
 
     cvsContainer.removeEventListener("mouseleave", this.mouseup, true);
+
+    this.parentNode.removeEventListener("mousemove", this.mousemove, true);
+
+    this.parentNode.removeEventListener("mouseup", this.mousemove, true);
   }
 
   private mousedown = (e): void => {
-    const { target } = e;
+    const { target, offsetX, offsetY, ctrlKey } = e;
 
     if (!this.canAcceptMousedown(target)) {
       return;
     }
 
-    this.updateMouseState(e);
+    this.updateMouseState(ctrlKey);
 
-    this.updateMousePosition(e);
+    this.updateCurrentScaleRatio();
 
-    this.updateBoardSize();
-
-    this.updateLayerZIndex();
-  }
-
-  private mousemove = (e): void => {
-    switch (this.state) {
-      case STATE.move:
-      this.mousemoveForMove(e);
-      break;
-      case STATE.scale:
-      this.mousemoveForScale(e);
-      break;
-      default:
-    }
-  }
-
-  private mouseup = (): void => {
-    this.restoreMouseState();
-
-    this.updateLayerZIndex();
-  }
-
-  private canAcceptMousedown(target: HTMLElement): boolean {
-    return this.refDomsPackage.cvsContainer.contains(target) &&
-            this.state === STATE.default &&
-            this.isLocked === false;
-  }
-
-  private updateMousePosition(e): void {
-    const { offsetX, offsetY, pageX, pageY } = e;
-
-    this.clickOffsetPos = [offsetX, offsetY];
-    this.clickPagePos = [pageX, pageY];
-  }
-
-  private updateBoardSize(): void {
-    const w = this.getStyleWidth();
-    const h = this.getStyleHeight();
-
-    this.tmpBoardSize = [w, h];
+    this.updateMousePosition(offsetX, offsetY);
   }
 
   // move mouse with 'ctrl' key pressed means to scale the image
-  private updateMouseState(e): void {
-    if (e.ctrlKey === true) {
+  private updateMouseState(isCtrlKeyPressed: boolean): void {
+    if (isCtrlKeyPressed === true) {
       this.state = STATE.scale;
     } else {
       this.state = STATE.move;
     }
   }
 
-  private updateLayerZIndex(): void {
-    if (this.state === STATE.move || this.state === STATE.scale) {
-      this.refDomsPackage.referenceBoard.classList.add("tmpTopLayer");
-    } else {
-      this.refDomsPackage.referenceBoard.classList.remove("tmpTopLayer");
+  private mousemove = (e): void => {
+    const { pageX, pageY, offsetX, buttons } = e;
+
+    if (!this.canAcceptMouseMove()) {
+      return;
+    }
+
+    if (!this.canContinueMouseMove(buttons)) {
+      this.mouseup(); // if you loose the left mouse button, then stop moving
+
+      return;
+    }
+
+    switch (this.state) {
+      case STATE.move:
+        this.mousemoveForMove(pageX, pageY);
+        break;
+      case STATE.scale:
+        this.mousemoveForScale(offsetX);
+        break;
+      default:
     }
   }
 
-  private restoreMouseState(): void {
-    if (this.state === STATE.move || this.state === STATE.scale) {
-      this.state = STATE.default;
-    }
+  private mouseup = (): void => {
+    this.state = STATE.default;
+
+    this.moveRefBoardlWithinClientScope();
   }
 
-  private mousemoveForMove(e): void {
-    const { pageX, pageY } = e;
-
-    const x: number = pageX - this.clickOffsetPos[0];
-    const y: number = pageY - this.clickOffsetPos[1] - REFERENCE_CONTROLLER_HEIGHT;
-
-    this.updateNodePosition(this.refDomsPackage.referenceBoard, x, y);
+  private canAcceptMousedown(target: HTMLElement): boolean {
+    return this.refDomsPackage.cvsContainer.contains(target) &&
+      this.state === STATE.default &&
+      this.isLocked === false;
   }
 
-   private updateNodePosition(node: HTMLElement, x: number, y: number): void {
+  private canAcceptMouseMove(): boolean {
+    return this.state === STATE.move || this.state === STATE.scale;
+  }
+
+  private canContinueMouseMove(buttons: number) {
+    return buttons === 1;
+  }
+
+  private updateMousePosition(offsetX: number, offsetY: number): void {
+    this.mouseOffsetPosition = { offsetX, offsetY };
+  }
+
+  private updateCurrentScaleRatio(): void {
+    this.currentScaleRatio = this.getStyleWidth() / this.getWidth();
+  }
+
+  private mousemoveForMove(pageX: number, pageY: number): void {
+    const x: number = pageX - this.mouseOffsetPosition.offsetX;
+    const y: number = pageY - this.mouseOffsetPosition.offsetY - REFERENCE_CONTROLLER_HEIGHT;
+
+    this.updateRefBoardNodePosition(x, y);
+  }
+
+  private updateRefBoardNodePosition(x: number, y: number): void {
+    const { referenceBoard } = this.refDomsPackage;
+
     window.requestAnimationFrame(() => {
-      node.style.left = x + "px";
-      node.style.top = y + "px";
+      referenceBoard.style.left = x + "px";
+      referenceBoard.style.top = y + "px";
     });
   }
 
-  private mousemoveForScale(e): void {
-    const scaleRatio = this.getScaleRatio(this.clickPagePos[0], e.pageX);
-
-    const scaledWidth = this.tmpBoardSize[0] * scaleRatio;
-    const scaledHeight = this.tmpBoardSize[1] * scaleRatio;
+  private mousemoveForScale(offsetX: number): void {
+    const moveDistance = offsetX - this.mouseOffsetPosition.offsetX;
+    const scaleRatio = this.getScaleRatioFromMoveDistance(moveDistance);
+    const combinedScaleRatio = this.currentScaleRatio + scaleRatio;
+    const scaledWidth = this.getWidth() * combinedScaleRatio;
+    const scaledHeight = this.getHeight() * combinedScaleRatio;
 
     if (scaledWidth > MIN_BOARD_WIDTH) {
       this.setStyleWidth(scaledWidth);
@@ -320,11 +380,29 @@ export default class ReferenceBoard extends Board {
     }
   }
 
-  private getScaleRatio(startPoint: number, endPoint: number): number {
-    const moveDistance = endPoint - startPoint;
-    const scaleRatio = moveDistance * DEFAULT_SCALE_RATIO + 1;
+  private getScaleRatioFromMoveDistance(moveDistance: number): number {
+    return moveDistance * DEFAULT_SCALE_RATIO;
+  }
 
-    return scaleRatio;
+  private moveRefBoardlWithinClientScope(): void {
+    const { referenceBoard } = this.refDomsPackage;
+    const { offsetLeft, offsetTop, offsetWidth, offsetHeight } = referenceBoard;
+    const { innerWidth, innerHeight } = this.windowSize;
+    const pos = { x: offsetLeft, y: offsetTop };
+
+    if (offsetLeft + 20 >= innerWidth) {
+      pos.x = innerWidth - 20;
+    } else if (offsetLeft + offsetWidth <= 20) {
+      pos.x = -offsetWidth + 20;
+    }
+
+    if (offsetTop + 20 + REFERENCE_CONTROLLER_HEIGHT >= innerHeight) {
+      pos.y = innerHeight - 20 - REFERENCE_CONTROLLER_HEIGHT;
+    } else if (offsetTop + offsetHeight <= 20) {
+      pos.y = -offsetHeight + 20;
+    }
+
+    this.updateRefBoardNodePosition(pos.x, pos.y);
   }
 
   // -----------------------------------------------------------------------------------------
@@ -449,12 +527,18 @@ export default class ReferenceBoard extends Board {
   }
 
   private opacityBlur = (e): void => {
-    if (this.isOpacityFocused === true) {
-      try {
-        this.opacityChange(e);
-      } catch (e) {
-        this.logger.error(e);
-      }
+    if (this.isOpacityFocused !== true) {
+      return;
+    }
+
+    try {
+      this.opacityChange(e);
+    } catch (err) {
+      this.updateOpacityInputAndBtn();
+
+      this.isOpacityFocused = false;
+
+      this.logger.error(err);
     }
   }
 
@@ -466,7 +550,7 @@ export default class ReferenceBoard extends Board {
       throw new Error("please enter number");
     }
 
-    if (opacity >= 100 && opacity <= 0) {
+    if (opacity >= 100 || opacity <= 0) {
       throw new Error("out of the range of opacity");
     }
 
@@ -483,12 +567,14 @@ export default class ReferenceBoard extends Board {
     const { cvsContainer } = this.refDomsPackage;
     const scaledOpacity = opacity / 100;
 
-    cvsContainer.style.opacity = scaledOpacity.toString();
+    window.requestAnimationFrame(() => {
+      cvsContainer.style.opacity = scaledOpacity.toString();
+    });
   }
 
   private changeOpacityOfIcon(opacity: number): void {
     const { opacityBtn } = this.refDomsPackage;
-    const iconOpacity =  (100 - (100 - opacity) * OPACITY_RATIO) / 100;
+    const iconOpacity = (100 - (100 - opacity) * OPACITY_RATIO) / 100;
 
     if (opacity === 0) {
       opacityBtn.classList.add("opacityZero");
@@ -496,7 +582,9 @@ export default class ReferenceBoard extends Board {
       opacityBtn.classList.remove("opacityZero");
     }
 
-    opacityBtn.style.opacity = iconOpacity.toString();
+    window.requestAnimationFrame(() => {
+      opacityBtn.style.opacity = iconOpacity.toString();
+    });
   }
 
   private updateOpacityInputAndBtn(): void {
@@ -553,23 +641,26 @@ export default class ReferenceBoard extends Board {
     this.state = STATE.pickColor;
   }
 
-  private pickColor = (e: MouseEvent): void => {
+  private pickColor = (e): void => {
+    const { buttons, offsetX, offsetY } = e;
+
     if (this.state !== STATE.pickColor) {
       return;
     }
 
-    if (e.button !== 2) {
-      const { offsetX, offsetY } = e;
-      const [r, g, b] = this.getColorAt(offsetX, offsetY);
-      const rgb: IRGB = { r, g, b };
+    this.logger.info("pick");
 
-      this.colorDial.changeColor(new RGB(rgb));
+    if (buttons !== 2) {
+      const [r, g, b] = this.getColorAt(offsetX, offsetY);
+      const rgb: RGB = new RGB({ r, g, b });
+
+      this.colorDial.changeColor(rgb);
     }
 
     this.state = STATE.default;
   }
 
-  private contextmenu(e: MouseEvent): void {
+  private contextmenu(e): void {
     e.preventDefault();
     e.stopPropagation();
   }
@@ -583,14 +674,18 @@ export default class ReferenceBoard extends Board {
   }
 
   private pixelateBlur = (e): void => {
-    if (this.isPixelateFocused !== true) {
+    if (this.isPixelateFocused !== true || this.isPixelateProcessing === true) {
       return;
     }
 
     try {
       this.pixelateChange(e);
-    } catch (e) {
-      this.logger.error(e);
+    } catch (err) {
+      this.updatePixelateInputAndBtn();
+
+      this.isPixelateFocused = false;
+
+      this.logger.error(err);
     }
   }
 
@@ -611,13 +706,18 @@ export default class ReferenceBoard extends Board {
     this.updatePixelateInputAndBtn();
 
     this.isPixelateFocused = false;
+
   }
 
   private pixelateContentCanvas(pixelSize: number): void {
+    this.isPixelateProcessing = true;
+
     this.pixelate.getPixelatedImageData(pixelSize, pixelSize)
-    .then((imageData) => {
-      this.drawImageData(imageData);
-    });
+      .then((imageData) => {
+        this.drawImageData(imageData);
+
+        this.isPixelateProcessing = false;
+      });
   }
 
   private updatePixelateInputAndBtn(): void {
@@ -634,5 +734,42 @@ export default class ReferenceBoard extends Board {
     pixelateInput.focus();
 
     pixelateInput.select();
+  }
+
+  // -----------------------------------------------------------------------------------------
+
+  private attachUtilsEvents() {
+    const { referenceBoard } = this.refDomsPackage;
+
+    window.addEventListener("resize", this.windowResize, true);
+
+    referenceBoard.addEventListener("drop", this.preventAndStop, true);
+
+    referenceBoard.addEventListener("dragover", this.preventAndStop, true);
+
+    referenceBoard.addEventListener("contextmenu", this.preventAndStop, true);
+  }
+
+  private removeUtilsEvents() {
+    const { referenceBoard } = this.refDomsPackage;
+
+    window.removeEventListener("resize", this.windowResize, true);
+
+    referenceBoard.removeEventListener("drop", this.preventAndStop, true);
+
+    referenceBoard.removeEventListener("dragover", this.preventAndStop, true);
+
+    referenceBoard.removeEventListener("contextmenu", this.preventAndStop, true);
+  }
+
+  private windowResize = (): void => {
+    this.windowSize = window;
+
+    this.moveRefBoardlWithinClientScope();
+  }
+
+  private preventAndStop = (e): void => {
+    e.preventDefault();
+    e.stopPropagation();
   }
 }

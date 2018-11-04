@@ -1,7 +1,5 @@
 import CanvasBoard from "./canvasBoard";
-// import ColorDial from "./colorDial";
 import { ColorDial } from "./components/colorDial";
-// import ReferenceBoard from "./referenceBoard";
 import ReferenceBoard from "./components/refBoard";
 import FileInput from "./fileInput";
 import OutputPanel from "./outputPanel";
@@ -24,7 +22,7 @@ export default class Main {
 
     this.outputPanel = new OutputPanel(pipelineParentNode);
 
-    this.canvasBoard = new CanvasBoard("canvas", canvasBoardParentNode);
+    // this.canvasBoard = new CanvasBoard("canvas", canvasBoardParentNode);
   }
 
   public init() {
@@ -46,7 +44,7 @@ export default class Main {
 
     this.fileInput.registerEvents(this.handleFile);
 
-    this.canvasBoard.init(this.colorDial, this.outputPanel);
+    // this.canvasBoard.init(this.colorDial, this.outputPanel);
   }
 
   private handleFile = (base64: string, name: string): void => {
@@ -54,7 +52,7 @@ export default class Main {
   }
 
   private addReferencrBoard(base64: string, name: string): void {
-    const parentNode: HTMLElement = document.getElementById("main");
+    const parentNode: HTMLElement = document.getElementById("refBoardContainer");
     const referenceBoard = new ReferenceBoard(name, parentNode, this.colorDial);
 
     referenceBoard.init(base64);

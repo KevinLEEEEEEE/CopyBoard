@@ -1,19 +1,13 @@
 import { IHex } from "./hex";
 import { IRGB } from "./rgb";
 
-export default abstract class Color<T> {
-  protected readonly color: T;
-
-  constructor(color: T) {
-    this.color = this.validate(color);
-  }
-
+export default abstract class Color {
   public abstract getRGB(): IRGB;
   public abstract getHex(): IHex;
-  public abstract validate(color: T): T;
+  public abstract validate(color);
 
   protected rgbToHex({ r, g, b }: IRGB): IHex {
-    const hex =  "#" + this.componentToHex(r) + this.componentToHex(g) + this.componentToHex(b);
+    const hex = "#" + this.componentToHex(r) + this.componentToHex(g) + this.componentToHex(b);
 
     return { hex };
   }
@@ -36,7 +30,7 @@ export default abstract class Color<T> {
       r: parseInt(splittedHex[1], 16),
       g: parseInt(splittedHex[2], 16),
       b: parseInt(splittedHex[3], 16),
-     } : { r: 0, g: 0, b: 0 };
+    } : { r: 0, g: 0, b: 0 };
   }
 
   private componentToHex(c: number): string {

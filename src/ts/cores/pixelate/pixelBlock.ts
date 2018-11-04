@@ -43,7 +43,7 @@ export default class PixelBlock {
       return [];
     }
 
-    const indexOfPosition =  y * this.width + x;
+    const indexOfPosition = y * this.width + x;
     const indexInImageData = indexOfPosition * SIZEOF_RGBA;
     const { data } = this.imageData;
 

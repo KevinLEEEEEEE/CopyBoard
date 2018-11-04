@@ -5,17 +5,21 @@ interface IHex {
   hex: string;
 }
 
-class Hex extends Color<IHex> {
+class Hex extends Color {
+  private hex: IHex;
+
   constructor(hex: IHex) {
-    super(hex);
+    super();
+
+    this.hex = this.validate(hex);
   }
 
   public getRGB(): IRGB {
-    return this.hexToRgb(this.color);
+    return this.hexToRgb(this.hex);
   }
 
   public getHex(): IHex {
-    return this.color;
+    return this.hex;
   }
 
   public validate({ hex }: IHex): IHex {

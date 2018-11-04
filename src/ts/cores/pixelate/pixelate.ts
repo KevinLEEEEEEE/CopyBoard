@@ -39,10 +39,10 @@ export default class Pixelate {
 
       this.pixelateWorker.postMessage(data);
     })
-    .catch((err) => {
-      this.logger.error("error with pixelate process, return original imageData", err);
+      .catch((err) => {
+        this.logger.error("error with pixelate process, return original imageData", err);
 
-      return this.imageData;
-    });
+        return this.imageData;
+      });
   }
 }
