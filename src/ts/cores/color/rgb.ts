@@ -7,6 +7,13 @@ interface IRGB {
   b: number;
 }
 
+interface IRGBA {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+}
+
 class RGB extends Color {
   private rgb: IRGB;
 
@@ -45,6 +52,7 @@ class RGB extends Color {
 
 export {
   IRGB,
+  IRGBA,
   IHex,
   RGB,
 };

@@ -1,3 +1,3 @@
-export default abstract class Observer {
-  public abstract update(): void;
+export default interface IObserver {
+  update(): void;
 }

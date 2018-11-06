@@ -26,6 +26,8 @@ class Pipeline {
   public init(imageData: ImageData): void {
     this.imageData = imageData;
 
+    this.isChanged = true;
+
     this.attachPipeEvents();
 
     this.getComponentBtnNodes();

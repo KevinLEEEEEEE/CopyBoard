@@ -1,8 +1,9 @@
-import CanvasBoard from "./canvasBoard";
 import { ColorDial } from "./components/colorDial";
+import CanvasBoard from "./components/cvsBoard";
+import { OutputPanel } from "./components/outputPanel";
 import ReferenceBoard from "./components/refBoard";
+import { initCustomElements, SimpleSlider } from "./components/widgets/widgets";
 import FileInput from "./fileInput";
-import OutputPanel from "./outputPanel";
 
 export default class Main {
   private colorDial: ColorDial;
@@ -13,8 +14,10 @@ export default class Main {
   constructor() {
     const colorDialParentNode: HTMLElement = document.getElementById("colorDialEventsLayer");
     const fileInputDetectNode: HTMLElement = document.getElementById("main");
-    const canvasBoardParentNode: HTMLElement = document.getElementById("canvasBoard");
+    const canvasBoardParentNode: HTMLElement = document.getElementById("cvsBoardContainer");
     const pipelineParentNode: HTMLElement = document.getElementById("pipeline");
+
+    initCustomElements();
 
     this.colorDial = new ColorDial(colorDialParentNode);
 
@@ -22,29 +25,29 @@ export default class Main {
 
     this.outputPanel = new OutputPanel(pipelineParentNode);
 
-    // this.canvasBoard = new CanvasBoard("canvas", canvasBoardParentNode);
+    this.canvasBoard = new CanvasBoard("canvas", canvasBoardParentNode, this.colorDial, this.outputPanel);
   }
 
   public init() {
-    this.attachColorChangeEvents();
-
     this.initComponents();
-  }
 
-  private attachColorChangeEvents(): void {
-    document.body.addEventListener("colorChange", this.colorChange, true);
+    const slider1 = document.getElementById("slider1") as SimpleSlider;
+
+    slider1.addEventListener("changed", (e) => {
+      console.log(e.detail);
+    });
   }
 
   private initComponents(): void {
     this.colorDial.init();
 
-    // this.colorDial.registerEvents(this.handleColorChange);
+    this.colorDial.attach(this.canvasBoard);
 
     this.fileInput.init();
 
     this.fileInput.registerEvents(this.handleFile);
 
-    // this.canvasBoard.init(this.colorDial, this.outputPanel);
+    this.canvasBoard.init();
   }
 
   private handleFile = (base64: string, name: string): void => {
@@ -56,16 +59,5 @@ export default class Main {
     const referenceBoard = new ReferenceBoard(name, parentNode, this.colorDial);
 
     referenceBoard.init(base64);
-  }
-
-  private colorChange = (e: CustomEvent) => {
-    const { rgba } = e.detail;
-    const [r, g, b] = rgba;
-
-    // this.colorDial.setRGBColor(r, g, b);
-  }
-
-  private handleColorChange = (hex: string) => {
-    this.canvasBoard.setFillColor(hex);
   }
 }

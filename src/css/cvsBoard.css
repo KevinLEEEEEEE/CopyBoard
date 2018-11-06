@@ -1,3 +1,12 @@
+#cvsBoardContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: initial;
+}
+
 .canvasBoard .rightPanel>div:not(:first-child):hover {
   background-color: rgba(0, 0, 0, .5);
 }

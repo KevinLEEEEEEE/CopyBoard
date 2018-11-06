@@ -1,5 +1,6 @@
 .output {
-  display: none;
+  /* display: none; */
+  display: flex;
   justify-content: center;
   align-items: center;
   position: absolute;
@@ -82,7 +83,8 @@
 
 .componentController span {
   line-height: 35px;
-  vertical-align: middle;
+  /* vertical-align: middle; */
+  vertical-align: top;
   font-size: 1rem;
 }
 
@@ -90,6 +92,7 @@
   margin-top: 1rem; 
 }
 
+/* 
 .slider {
   display: flex;
   flex-direction: row;
@@ -125,7 +128,7 @@
   border-radius: 20px;
   background-color: rgb(245, 245, 245);
   box-shadow: 0 0 0 2px rgb(245, 245, 245);
-}
+} */
 
 .opacityBlack {
   background-image: url('../image//icons//displayBlack.png');

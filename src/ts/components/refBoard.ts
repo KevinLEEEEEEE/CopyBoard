@@ -1,13 +1,13 @@
 import { RGB } from "../cores/color/rgb";
 import { IPixelateInput, Pixelate } from "../cores/pixelate/pixelate";
-import { IReferenceTemplate, referenceTemplate } from "../templates/referenceTemplate";
 import Log from "../utils/log/log";
 import Board from "./board";
-import { IColorChange } from "./colorDial";
+import { IColorDial } from "./colorDial";
+import { IReferenceTemplate, referenceTemplate } from "./templates/referenceTemplate";
 
-const REFERENCE_CONTROLLER_HEIGHT = 70;
 const DEFAULT_SCALE_RATIO = 0.005;
 const WIDTH_LIMITAION_RATIO = 3;
+const CONTROLLER_HEIGHT = 70;
 const MIN_BOARD_WIDTH = 300;
 const OPACITY_RATIO = 0.6;
 const enum STATE {
@@ -30,12 +30,12 @@ interface IMouseOffsetPosition {
 export default class ReferenceBoard extends Board {
   private readonly refDomsPackage: IReferenceTemplate;
   private readonly parentNode: HTMLElement;
-  private readonly colorDial: IColorChange;
+  private readonly colorDial: IColorDial;
   private readonly pixelate: Pixelate;
   private mouseOffsetPosition: IMouseOffsetPosition;
   private windowSize: IWindowSize = window;
+  private originImageData: ImageData;
   private currentScaleRatio: number;
-  private imageData: ImageData;
   private isPixelateProcessing: boolean = false;
   private isPixelateFocused: boolean = false;
   private isOpacityFocused: boolean = false;
@@ -43,7 +43,7 @@ export default class ReferenceBoard extends Board {
   private state: STATE;
   private logger: Log;
 
-  constructor(name: string, parentNode: HTMLElement, colorDial: IColorChange) {
+  constructor(name: string, parentNode: HTMLElement, colorDial: IColorDial) {
     super(name);
 
     this.colorDial = colorDial;
@@ -79,8 +79,6 @@ export default class ReferenceBoard extends Board {
         this.displayImageOnCanvas(img);
 
         this.updateCurrentScaleRatio();
-
-        this.imageData = this.getImageData();
 
         this.setCanvasParentNode(this.refDomsPackage.cvsContainer);
 
@@ -157,6 +155,8 @@ export default class ReferenceBoard extends Board {
     this.scaleImageToFitTheParentSize(img);
 
     this.drawImage(img, 0, 0, width, height);
+
+    this.originImageData = this.getImageData();
   }
 
   private scaleImageToFitTheParentSize(img: HTMLImageElement): void { // update required
@@ -258,15 +258,13 @@ export default class ReferenceBoard extends Board {
   }
 
   private removeMoveEvents(): void {
-    const { cvsContainer } = this.refDomsPackage;
+    const { referenceBoard } = this.refDomsPackage;
 
-    cvsContainer.removeEventListener("mousedown", this.mousedown, true);
+    referenceBoard.removeEventListener("mousedown", this.mousedown);
 
-    cvsContainer.removeEventListener("mousemove", this.mousemove, true);
+    referenceBoard.removeEventListener("mousemove", this.mousemove);
 
-    cvsContainer.removeEventListener("mouseup", this.mouseup, true);
-
-    cvsContainer.removeEventListener("mouseleave", this.mouseup, true);
+    referenceBoard.removeEventListener("mouseup", this.mouseup);
 
     this.parentNode.removeEventListener("mousemove", this.mousemove, true);
 
@@ -350,7 +348,7 @@ export default class ReferenceBoard extends Board {
 
   private mousemoveForMove(pageX: number, pageY: number): void {
     const x: number = pageX - this.mouseOffsetPosition.offsetX;
-    const y: number = pageY - this.mouseOffsetPosition.offsetY - REFERENCE_CONTROLLER_HEIGHT;
+    const y: number = pageY - this.mouseOffsetPosition.offsetY - CONTROLLER_HEIGHT;
 
     this.updateRefBoardNodePosition(x, y);
   }
@@ -393,8 +391,8 @@ export default class ReferenceBoard extends Board {
       pos.x = -offsetWidth + 20;
     }
 
-    if (offsetTop + 20 + REFERENCE_CONTROLLER_HEIGHT >= innerHeight) {
-      pos.y = innerHeight - 20 - REFERENCE_CONTROLLER_HEIGHT;
+    if (offsetTop + 20 + CONTROLLER_HEIGHT >= innerHeight) {
+      pos.y = innerHeight - 20 - CONTROLLER_HEIGHT;
     } else if (offsetTop + offsetHeight <= 20) {
       pos.y = -offsetHeight + 20;
     }
@@ -547,7 +545,7 @@ export default class ReferenceBoard extends Board {
       throw new Error("please enter number");
     }
 
-    if (opacity >= 100 || opacity <= 0) {
+    if (opacity > 100 || opacity < 0) {
       throw new Error("out of the range of opacity");
     }
 
@@ -645,8 +643,6 @@ export default class ReferenceBoard extends Board {
       return;
     }
 
-    this.logger.info("pick");
-
     if (buttons !== 2) {
       const [r, g, b] = this.getColorAt(offsetX, offsetY);
       const rgb: RGB = new RGB({ r, g, b });
@@ -671,7 +667,7 @@ export default class ReferenceBoard extends Board {
   }
 
   private pixelateBlur = (e): void => {
-    if (this.isPixelateFocused !== true || this.isPixelateProcessing === true) {
+    if (this.isPixelateFocused !== true) {
       return;
     }
 
@@ -690,6 +686,10 @@ export default class ReferenceBoard extends Board {
     const { value } = e.target;
     const pixelSize = parseInt(value, 10);
 
+    if (this.isPixelateProcessing === true) {
+      throw new Error("cannot run before end");
+    }
+
     if (typeof pixelSize !== "number") {
       throw new Error("please enter number");
     }
@@ -703,14 +703,13 @@ export default class ReferenceBoard extends Board {
     this.updatePixelateInputAndBtn();
 
     this.isPixelateFocused = false;
-
   }
 
   private pixelateContentCanvas(pixelSize: number): void {
     this.isPixelateProcessing = true;
 
     const pixelateInput: IPixelateInput = {
-      imageData: this.imageData,
+      imageData: this.originImageData,
       widthPerPixel: pixelSize,
       heightPerPixel: pixelSize,
     };

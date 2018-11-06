@@ -1,5 +1,7 @@
 import Color from "../cores/color/color";
-import { Hex } from "../cores/color/hex";
+import { Hex, IHex } from "../cores/color/hex";
+import { IRGB } from "../cores/color/rgb";
+import Subject from "../cores/observer/subject";
 import Log from "../utils/log/log";
 import { colorDialTemplate, IColorDialTemplate } from "./templates/colorDialTemplate";
 
@@ -8,8 +10,10 @@ const enum STATE {
   move,
 }
 
-interface IColorChange {
+interface IColorDial {
   changeColor(color: Color): void;
+  getRGB(): IRGB;
+  getHex(): IHex;
 }
 
 interface IWindowSize {
@@ -27,16 +31,18 @@ interface INodePosition {
   y: number;
 }
 
-class ColorDial implements IColorChange {
+class ColorDial extends Subject implements IColorDial {
   private readonly dialDomsPackage: IColorDialTemplate;
   private readonly parentNode: HTMLElement;
   private readonly logger: Log;
-  private currentColor: Color = new Hex({ hex: "#ffffff" });
+  private currentColor: Color = new Hex({ hex: "#000000" });
   private mouseOffsetPosition: IMouseOffsetPosition;
   private windowSize: IWindowSize = window;
   private state: STATE = STATE.default;
 
   constructor(parentNode: HTMLElement) {
+    super();
+
     this.dialDomsPackage = colorDialTemplate();
 
     this.parentNode = parentNode;
@@ -74,6 +80,14 @@ class ColorDial implements IColorChange {
     this.logger.info("color change from other panel");
 
     this.changeCurrentColor(color);
+  }
+
+  public getRGB(): IRGB {
+    return this.currentColor.getRGB();
+  }
+
+  public getHex(): IHex {
+    return this.currentColor.getHex();
   }
 
   private appendSelfToParentNode(): void {
@@ -258,6 +272,8 @@ class ColorDial implements IColorChange {
     this.currentColor = color;
 
     this.updateInputDisplay();
+
+    this.notifyObservers();
   }
 
   private updateInputDisplay() {
@@ -308,5 +324,5 @@ class ColorDial implements IColorChange {
 
 export {
   ColorDial,
-  IColorChange,
+  IColorDial,
 };
