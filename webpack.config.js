@@ -39,7 +39,7 @@ module.exports = {
       {
         test: /\.html$/,
         use: {
-            loader: 'html-loader',
+          loader: 'html-loader',
         },
       },
       {
@@ -65,8 +65,7 @@ module.exports = {
           options: {
             name: 'assets/fonts/[name]-[hash:6].[ext]',
           },
-        },
-        ],
+        }],
       },
       {
         test: /\.(csv|tsv)$/,
@@ -83,8 +82,8 @@ module.exports = {
       {
         test: /\.worker.js$/,
         use: [
-          'worker-loader'
-        ]
+          'worker-loader',
+        ],
       }
     ]
   },

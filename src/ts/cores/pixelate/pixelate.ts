@@ -1,4 +1,4 @@
-import PixelateWorker = require("worker-loader?name=dist/[name].js!./pixelate.worker");
+import PixelateWorker = require("worker-loader?name=assets/js/[name].js!./pixelate.worker");
 import Logger from "../../utils/log/log";
 
 interface IPixelateInput {
