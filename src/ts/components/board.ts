@@ -53,6 +53,14 @@ export default class Board {
     return [data[index], data[index + 1], data[index + 2], data[index + 3]];
   }
 
+  public activePixelBoard(): void {
+    this.canvas.classList.add("pixelCanvas");
+  }
+
+  public shutDownPixelBoard(): void {
+    this.canvas.classList.remove("pixelCanvas");
+  }
+
   // -----------------------------------------------------------------------------------------
 
   public setName(name: string): void {

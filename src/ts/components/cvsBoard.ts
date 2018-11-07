@@ -6,6 +6,8 @@ import { IOutputPanel } from "./outputPanel";
 import { ShadowBoard, shadowMode } from "./shadowBoard";
 import { canvasTemplate, ICanvasTemplate } from "./templates/canvasTemplate";
 
+// setting(save, empty, bgcolor)
+
 const DEFAULT_SCALE_RATIO = 0.05;
 const CONTROLLER_HEIGHT = 70;
 const MIN_BOARD_WIDTH = 300;
@@ -29,8 +31,6 @@ interface IMouseOffsetPosition {
   offsetX: number;
   offsetY: number;
 }
-
-// bucket, setting(save, empty, bgcolor)
 
 class CanvasBoard extends ShadowBoard implements IObserver {
   private readonly cvsDomsPackage: ICanvasTemplate;
@@ -72,6 +72,8 @@ class CanvasBoard extends ShadowBoard implements IObserver {
     this.attachSettingBtnEvents();
 
     this.attachUtilsEvents();
+
+    this.activePixelBoard();
 
     this.setCanvasParentNode(this.cvsDomsPackage.cvsContainer);
 

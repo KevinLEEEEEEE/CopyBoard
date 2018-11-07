@@ -20,15 +20,16 @@ interface IMouseOffsetPosition {
 class SimpleSlider extends EventElement {
   static get observedAttributes() { return ["value", "min", "max"]; }
 
+  public value: number;
+  public min: number;
+  public max: number;
+
   private simpleSliderDomsRect: ISimpleSliderDomsRect = { sliderBar: null, sliderBlock: null };
   private simpleSliderDoms: ISimpleSliderDoms;
   private mouseOffsetPosition: IMouseOffsetPosition;
   private logger: Logger = new Logger();
   private widthOfSliderBar: number;
   private leftOfSliderBlock: number;
-  private valueOfSlider: number;
-  private minOfSlider: number;
-  private maxOfSlider: number;
   private canMove: boolean = false;
 
   constructor() {
@@ -44,43 +45,15 @@ class SimpleSlider extends EventElement {
 
     this.initDataDrivenAttributes();
 
-    this.addTatget(this.simpleSliderDoms.slider);
+    this.addTarget(this.simpleSliderDoms.slider); // target form custom events
 
-    shadow.appendChild(clonedContent); // the dom cannot be find after appended
+    shadow.appendChild(clonedContent); // the dom cannot be find after appended to shadowDom
   }
-
-  public get value(): number {
-    return this.valueOfSlider;
-  }
-
-  public set value(value: number) {
-    this.valueOfSlider = value;
-  }
-
-  public get min(): number {
-    return this.minOfSlider;
-  }
-
-  public set min(min: number) {
-    this.minOfSlider = min;
-  }
-
-  public get max(): number {
-    return this.maxOfSlider;
-  }
-
-  public set max(max: number) {
-    this.maxOfSlider = max;
-  }
-
-  // -----------------------------------------------------------------------------------------
 
   public connectedCallback(): void {
     this.logger.info("Custom element added to page");
 
-    this.attachSliderEvents();
-
-    this.attachUtilsEvents();
+    this.attachAllEvents();
 
     this.updateSimpleSliderDomsClientRect();
 
@@ -90,7 +63,7 @@ class SimpleSlider extends EventElement {
   public disconnectedCallback(): void {
     this.logger.info("Custom element removed from page");
 
-    this.updateRendering();
+    this.removeAllEvents();
   }
 
   public adoptedCallback(): void {
@@ -102,18 +75,16 @@ class SimpleSlider extends EventElement {
   }
 
   public attributeChangedCallback(name, prev, current): void {
-    this.logger.info("Custom element attribute changed from " + prev + " to " + current);
+    this.logger.info("Custom element " + name + " changed from " + prev + " to " + current);
 
     this.valudateAndUpdateAttribute(name, current);
   }
-
-  // -----------------------------------------------------------------------------------------
 
   private valudateAndUpdateAttribute(name: string, value: string): void {
     const parsed = parseInt(value, 10);
 
     if (this.isValidNumber(parsed) === true) {
-      this.updateAttribute(name, parsed);
+      this[name] = parsed;
     }
   }
 
@@ -121,20 +92,19 @@ class SimpleSlider extends EventElement {
     return !isNaN(num);
   }
 
-  private updateAttribute(name: string, value: number): void {
-    switch (name) {
-      case "value":
-        this.valueOfSlider = value;
-        break;
-      case "max":
-        this.maxOfSlider = value;
-        break;
-      case "min":
-        this.minOfSlider = value;
-        break;
-      default:
-    }
+  private attachAllEvents(): void {
+    this.attachSliderEvents();
+
+    this.attachUtilsEvents();
   }
+
+  private removeAllEvents(): void {
+    this.removeSliderEvents();
+
+    this.removeUtilsEvents();
+  }
+
+  // -----------------------------------------------------------------------------------------
 
   private initDomsPackage(frag: DocumentFragment): void {
     const slider = frag.querySelector(".slider") as HTMLDivElement;
@@ -148,12 +118,10 @@ class SimpleSlider extends EventElement {
     };
   }
 
-  // -----------------------------------------------------------------------------------------
-
   private initDataDrivenAttributes(): void {
     const that = this;
 
-    Reflect.defineProperty(this, "valueOfSlider", {
+    Reflect.defineProperty(this, "value", {
       get(): number {
         return this._valueOfSlider || 0;
       },
@@ -168,7 +136,7 @@ class SimpleSlider extends EventElement {
       enumerable: false,
     });
 
-    Reflect.defineProperty(this, "minOfSlider", {
+    Reflect.defineProperty(this, "min", {
       get(): number {
         return this._minOfSlider || 0;
       },
@@ -183,7 +151,7 @@ class SimpleSlider extends EventElement {
       enumerable: false,
     });
 
-    Reflect.defineProperty(this, "maxOfSlider", {
+    Reflect.defineProperty(this, "max", {
       get(): number {
         return this._maxOfSlider;
       },
@@ -200,47 +168,38 @@ class SimpleSlider extends EventElement {
   }
 
   private getValidValue(value: number): number {
-    if (value > this.maxOfSlider) {
-      return this.maxOfSlider;
-    } else if (value < this.minOfSlider) {
-      return this.minOfSlider;
-    } else {
-      return value;
+    if (value > this.max) {
+      return this.max;
+    } else if (value < this.min) {
+      return this.min;
     }
+
+    return value;
   }
 
   private getValidMin(min: number): number {
-    if (min > this.maxOfSlider) {
-      return this.maxOfSlider;
-    } else {
-      return min;
-    }
+    return min > this.max ? this.max : min;
   }
 
   private getValidMax(max: number): number {
-    if (max < this.minOfSlider) {
-      return this.minOfSlider;
-    } else {
-      return max;
-    }
+    return max < this.min ? this.min : max;
   }
 
   private recalculateAttributes(): void {
-    const total = this.maxOfSlider - this.minOfSlider;
+    const total = this.max - this.min;
     const percentage = this.leftOfSliderBlock / this.widthOfSliderBar;
-    const value = total * percentage + this.minOfSlider;
+    const value = total * percentage + this.min;
 
     if (this.isValidNumber(value) === true) {
-      this.valueOfSlider = value;
+      this.value = value;
 
       // this.logger.info("current value: " + value);
     }
   }
 
   private updateRendering(): void {
-    const value = this.valueOfSlider;
-    const total = this.maxOfSlider - this.minOfSlider;
-    const percentage = (value - this.minOfSlider) / total;
+    const total = this.max - this.min;
+    const percentage = (this.value - this.min) / total;
     const left = this.widthOfSliderBar * percentage;
 
     if (this.isValidNumber(left) === true) {
@@ -248,7 +207,7 @@ class SimpleSlider extends EventElement {
 
       this.updateSliderBlockNodeXPosition();
 
-      // this.logger.info("current node position percentage: " + percentage);
+      this.logger.info("current node position percentage: " + percentage);
     }
   }
 
@@ -264,6 +223,18 @@ class SimpleSlider extends EventElement {
     sliderBlock.addEventListener("mouseup", this.mouseup, true);
 
     sliderBar.addEventListener("mousemove", this.mousemove, true);
+  }
+
+  private removeSliderEvents(): void {
+    const { sliderBar, sliderBlock } = this.simpleSliderDoms;
+
+    sliderBlock.removeEventListener("mousedown", this.mousedown, true);
+
+    sliderBlock.removeEventListener("mousemove", this.mousemove, true);
+
+    sliderBlock.removeEventListener("mouseup", this.mouseup, true);
+
+    sliderBar.removeEventListener("mousemove", this.mousemove, true);
   }
 
   private mousedown = (e): void => {
@@ -344,8 +315,12 @@ class SimpleSlider extends EventElement {
 
     this.recalculateAttributes();
 
-    this.dispatchCustomEvent("changed", { // restructure required
-      value: this.valueOfSlider,
+    this.dispatchChangedEvemt();
+  }
+
+  private dispatchChangedEvemt(): void {
+    this.dispatchCustomEvent("changed", {
+      value: this.value,
     });
   }
 
@@ -357,6 +332,14 @@ class SimpleSlider extends EventElement {
     sliderBar.addEventListener("resize", this.sliderBarResize, true);
 
     sliderBlock.addEventListener("resize", this.sliderBlockResize, true);
+  }
+
+  private removeUtilsEvents(): void {
+    const { sliderBar, sliderBlock } = this.simpleSliderDoms;
+
+    sliderBar.removeEventListener("resize", this.sliderBarResize, true);
+
+    sliderBlock.removeEventListener("resize", this.sliderBlockResize, true);
   }
 
   private updateSimpleSliderDomsClientRect(): void {

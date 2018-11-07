@@ -5,11 +5,11 @@ export default class EventElement extends HTMLElement {
     super();
   }
 
-  protected addTatget(node: HTMLElement): void {
+  protected addTarget(node: HTMLElement): void {
     this.targets.add(node);
   }
 
-  protected removeTatget(node: HTMLElement): void {
+  protected removeTarget(node: HTMLElement): void {
     this.targets.delete(node);
   }
 

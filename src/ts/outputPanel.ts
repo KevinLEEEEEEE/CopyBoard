@@ -8,9 +8,9 @@ export default class OutputPanel {
   }
 
   public init(imageData: ImageData): void {
-    const pipeline = new Pipeline(this.parentNode);
+    // const pipeline = new Pipeline(this.parentNode);
 
-    pipeline.init(imageData);
+    // pipeline.init(imageData);
 
     this.displayOutputPanel();
 

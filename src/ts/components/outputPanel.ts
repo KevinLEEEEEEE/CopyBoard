@@ -25,7 +25,7 @@ class OutputPanel implements IOutputPanel {
   }
 
   public updateOutputImage(imageData: ImageData) {
-    this.pipeline.init(imageData);
+    // this.pipeline.init(imageData);
 
     this.displayOutputPanel();
 
@@ -35,7 +35,7 @@ class OutputPanel implements IOutputPanel {
   private displayOutputPanel(): void {
     const outputPanel = document.getElementById("output");
 
-    outputPanel.classList.add("outputDisplay");
+    outputPanel.classList.add("outputVisible");
   }
 
   private drawImageDataOnCavas(imageData: ImageData): void {

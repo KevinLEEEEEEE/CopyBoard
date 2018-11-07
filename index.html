@@ -11,72 +11,11 @@
 <body>
   <div id="main"></div>
 
-  <div id="refBoardContainer" class="noPointerEvents  initialPointerEventsForChildren"></div>
+  <div id="refBoardContainer" class="noPointerEvents initialPointerEventsForChildren"></div>
 
-  <div id="cvsBoardContainer" class="noPointerEvents  initialPointerEventsForChildren"></div>
+  <div id="cvsBoardContainer" class="noPointerEvents initialPointerEventsForChildren"></div>
 
   <div id="colorDialEventsLayer" class="noPointerEvents"></div>
-
-  <template id="simple-slider">
-    <style>
-      .slider {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        padding: 0 1rem;
-        background-color: rgb(245, 245, 245);
-      }
-
-      .slider p {
-        margin: 0;
-        padding: 0;
-        user-select: none;
-        font-size: .85rem;
-      }
-
-      .sliderBar {
-        display: flex;
-        align-items: center;
-        position: relative;
-        width: 100%;
-        height: 1.5rem;
-        margin: 0 .5rem;
-        overflow-x: hidden;
-        background-image: linear-gradient(rgb(50, 50, 50) 2px, transparent 0);
-        background-size: calc(100% - 2rem) 2px;
-        background-position: center center;
-        background-repeat: no-repeat;
-      }
-
-      .sliderBlock {
-        position: absolute;
-        left: calc(50% - 0.75rem);
-        top: 0;
-        width: 1.5rem;
-        height: 1.5rem;
-        padding: 0;
-        border: 1.5px rgb(50, 50, 50) solid;
-        border-radius: 1rem;
-        background-color: rgb(245, 245, 245);
-        box-shadow: 0 0 0 2px rgb(245, 245, 245);
-        box-sizing: border-box;
-        outline: none;
-      }
-    </style>
-
-    <div class="slider">
-      <p>
-        <slot name="min">min</slot>
-      </p>
-      <div class="sliderBar">
-        <button class="sliderBlock"></button>
-      </div>
-      <p>
-        <slot name="max">max</slot>
-      </p>
-    </div>
-  </template>
-
 
   <!-- <div class="board referenceBoard">
       <div class="boardController">
@@ -149,16 +88,133 @@
       </div>
     </div> -->
 
-  <!-- <div class="colorDial">
-      <div>
-        <div class="colorContainer">
-          <input type="color">
+  <!-- <div class="colorDial"> -->
+
+  <template id="simple-slider">
+    <style>
+      .slider {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        padding: 0 1rem;
+        background-color: rgb(245, 245, 245);
+      }
+
+      .slider p {
+        margin: 0;
+        padding: 0;
+        user-select: none;
+        font-size: .85rem;
+      }
+
+      .sliderBar {
+        display: flex;
+        align-items: center;
+        position: relative;
+        width: 100%;
+        height: 1.5rem;
+        margin: 0 .5rem;
+        overflow-x: hidden;
+        background-image: linear-gradient(rgb(50, 50, 50) 2px, transparent 0);
+        background-size: calc(100% - 2rem) 2px;
+        background-position: center center;
+        background-repeat: no-repeat;
+      }
+
+      .sliderBlock {
+        position: absolute;
+        left: calc(50% - 0.75rem);
+        top: 0;
+        width: 1.5rem;
+        height: 1.5rem;
+        padding: 0;
+        border: 1.5px rgb(50, 50, 50) solid;
+        border-radius: 0.75rem;
+        background-color: rgb(245, 245, 245);
+        box-shadow: 0 0 0 2px rgb(245, 245, 245);
+        box-sizing: border-box;
+        outline: none;
+      }
+    </style>
+
+    <div class="slider">
+      <p>
+        <slot name="min">min</slot>
+      </p>
+      <div class="sliderBar">
+        <button class="sliderBlock"></button>
+      </div>
+      <p>
+        <slot name="max">max</slot>
+      </p>
+    </div>
+  </template>
+
+  <template id="pipe-component">
+    <style>
+      .component {
+        width: 100%;
+        height: 200px;
+      }
+
+      .componentController {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+      }
+
+      .componentBtn {
+        width: 25px;
+        height: 25px;
+        padding: 0;
+        overflow: hidden;
+        background: none;
+        border: transparent;
+        outline: none;
+      }
+
+      .componentBtn img {
+        width: 100%;
+        height: 100%;
+      }
+
+      .componentName {
+        display: inline-block;
+        height: 25px;
+        overflow: hidden;
+        vertical-align: top;
+        line-height: 25px;
+      }
+
+      .componentContent {
+        margin-top: 1rem;
+      }
+
+      .noDisplay {
+        display: none;
+      }
+    </style>
+
+    <div class="component">
+      <div class="componentController">
+        <div>
+          <button class="componentBtn displayBtn">
+            <img src="./src/image/icons/displayBlack.png" alt="display button">
+            <img src="./src//image/icons/noDisplayBlack.png" alt="no display button" class="noDisplay">
+          </button>
+          <span class="componentName">none</span>
         </div>
-        <div class="colorContainer">
-          <input type="color">
+        <div>
+          <button class="componentBtn deleteBtn">
+            <img src="./src/image/icons/deleteBlack.png" alt="delete button">
+          </button>
         </div>
       </div>
-    </div> -->
+      <div class="componentContent">
+        <slot name="content"></slot>
+      </div>
+    </div>
+  </template>
 
   <div class="output" id="output">
     <div class="outputPanel">
@@ -167,41 +223,23 @@
           <canvas class="outputCanvas" id="outputCanvas"></canvas>
         </div>
         <div class="componentBtnContainer">
-          <button class="componentBtn lightnessBtn" id="lightnessBtn" name="lightness"></button>
-          <button class="componentBtn contrastBtn" id="contrastBtn" name="contrast"></button>
-          <button class="componentBtn saturationBtn" id="saturationBtn" name="saturation"></button>
-          <button class="componentBtn curveBtn" id="curveBtn" name="curve"></button>
-          <button class="componentBtn downloadBtn" id="downloadBtn" name="download"></button>
+          <button class="lightnessBtn" id="lightnessBtn" name="lightness"></button>
+          <button class="contrastBtn" id="contrastBtn" name="contrast"></button>
+          <button class="saturationBtn" id="saturationBtn" name="saturation"></button>
+          <button class="curveBtn" id="curveBtn" name="curve"></button>
+          <button class="downloadBtn" id="downloadBtn" name="download"></button>
         </div>
       </div>
       <div class="outputComponents">
         <div id="pipeline">
-          <div class="component">
-            <div class="componentController">
-              <div>
-                <button class="opacityBlack"></button>
-                <span>lightness</span>
-              </div>
-              <div>
-                <button class="deleteBlack"></button>
-              </div>
-            </div>
-            <div class="componentContent">
 
-              <simple-slider min="-100" max="100" value="10" id="slider1">
-                <span slot="min">-100</span>
-                <span slot="max">100</span>
-              </simple-slider>
-              <!-- <div class="slider">
-                  <p class="sliderLimit">-100</p>
-                  <div class="sliderController">
-                    <button class="sliderBar"></button>
-                    <div class="sliderLine"></div>
-                  </div>
-                  <p class="sliderLimit">100</p>
-                </div> -->
-            </div>
-          </div>
+          <pipe-component name="lightness" id="slider1">
+            <simple-slider slot="content" min="-100" max="100" value="10">
+              <span slot="min">-100</span>
+              <span slot="max">100</span>
+            </simple-slider>
+          </pipe-component>
+
         </div>
       </div>
     </div>

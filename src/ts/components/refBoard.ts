@@ -698,6 +698,8 @@ export default class ReferenceBoard extends Board {
       throw new Error("out of the range of pixel size");
     }
 
+    this.updatePixelCanvasRendering(pixelSize);
+
     this.pixelateContentCanvas(pixelSize);
 
     this.updatePixelateInputAndBtn();
@@ -725,6 +727,14 @@ export default class ReferenceBoard extends Board {
 
         this.isPixelateProcessing = false;
       });
+  }
+
+  private updatePixelCanvasRendering(pixelSize: number): void {
+    if (pixelSize === 1) {
+      this.shutDownPixelBoard();
+    } else {
+      this.activePixelBoard();
+    }
   }
 
   private updatePixelateInputAndBtn(): void {
