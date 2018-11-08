@@ -207,7 +207,7 @@ class SimpleSlider extends EventElement {
 
       this.updateSliderBlockNodeXPosition();
 
-      this.logger.info("current node position percentage: " + percentage);
+      // this.logger.info("current node position percentage: " + percentage);
     }
   }
 

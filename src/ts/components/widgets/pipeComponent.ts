@@ -139,12 +139,13 @@ export default class PipeComponent extends EventElement {
 
     this.updateDisplayBtnIcon();
 
-    // emit event
+    this.dispatchDisplayToggledEvent();
   }
 
   private delete = (): void => {
     this.isDeleted = true;
-    // emit event
+
+    this.dispatchDeletedEvent();
   }
 
   private updateDisplayBtnIcon(): void {
@@ -157,6 +158,16 @@ export default class PipeComponent extends EventElement {
       displayImage.classList.add("noDisplay");
       noDisplayImage.classList.remove("noDisplay");
     }
+  }
+
+  private dispatchDisplayToggledEvent(): void {
+    this.dispatchCustomEvent("displayToggle", {
+      isVisible: this.isVisible,
+    });
+  }
+
+  private dispatchDeletedEvent(): void {
+    this.dispatchCustomEvent("delete", null);
   }
 
   // -----------------------------------------------------------------------------------------

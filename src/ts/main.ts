@@ -2,7 +2,7 @@ import { ColorDial } from "./components/colorDial";
 import CanvasBoard from "./components/cvsBoard";
 import { OutputPanel } from "./components/outputPanel";
 import ReferenceBoard from "./components/refBoard";
-import { initCustomElements, SimpleSlider } from "./components/widgets/widgets";
+import { initCustomElements } from "./components/widgets/widgets";
 import FileInput from "./fileInput";
 
 export default class Main {
@@ -30,12 +30,6 @@ export default class Main {
 
   public init() {
     this.initComponents();
-
-    const slider1 = document.getElementById("slider1") as SimpleSlider;
-
-    slider1.addEventListener("changed", (e) => {
-      console.log(e.detail);
-    });
   }
 
   private initComponents(): void {

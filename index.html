@@ -154,7 +154,7 @@
     <style>
       .component {
         width: 100%;
-        height: 200px;
+        margin-bottom: 4rem;
       }
 
       .componentController {
@@ -216,6 +216,15 @@
     </div>
   </template>
 
+  <template id="pipe-brightness">
+    <pipe-component name="lightness">
+      <simple-slider slot="content" min="-100" max="100" value="10">
+        <span slot="min">-100</span>
+        <span slot="max">100</span>
+      </simple-slider>
+    </pipe-component>
+  </template>
+
   <div class="output" id="output">
     <div class="outputPanel">
       <div class="outputPreview">
@@ -233,12 +242,9 @@
       <div class="outputComponents">
         <div id="pipeline">
 
-          <pipe-component name="lightness" id="slider1">
-            <simple-slider slot="content" min="-100" max="100" value="10">
-              <span slot="min">-100</span>
-              <span slot="max">100</span>
-            </simple-slider>
-          </pipe-component>
+          <pipe-brightness></pipe-brightness>
+          <pipe-brightness></pipe-brightness>
+          <pipe-brightness></pipe-brightness>
 
         </div>
       </div>
