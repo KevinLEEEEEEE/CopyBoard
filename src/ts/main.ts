@@ -42,6 +42,8 @@ export default class Main {
     this.fileInput.registerEvents(this.handleFile);
 
     this.canvasBoard.init();
+
+    this.outputPanel.init();
   }
 
   private handleFile = (base64: string, name: string): void => {

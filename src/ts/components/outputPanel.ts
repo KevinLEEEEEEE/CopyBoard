@@ -1,4 +1,4 @@
-import { Pipeline } from "../pipieline/pipeline";
+import { componentsType, Pipeline } from "./pipeline";
 
 interface IOutputPanel {
   updateOutputImage(imageData: ImageData): void;
@@ -14,19 +14,11 @@ class OutputPanel implements IOutputPanel {
     this.pipeline = new Pipeline(parentNode);
   }
 
-  public init(imageData: ImageData): void {
-    // const pipeline = new Pipeline(this.parentNode);
-
-    // pipeline.init(imageData);
-
-    this.displayOutputPanel();
-
-    this.drawImageDataOnCavas(imageData);
+  public init(): void {
+    this.attachBtnEvents();
   }
 
   public updateOutputImage(imageData: ImageData) {
-    // this.pipeline.init(imageData);
-
     this.displayOutputPanel();
 
     this.drawImageDataOnCavas(imageData);
@@ -43,6 +35,22 @@ class OutputPanel implements IOutputPanel {
     const ctx: CanvasRenderingContext2D = outputCanvas.getContext("2d");
 
     ctx.putImageData(imageData, 0, 0);
+  }
+
+  private attachBtnEvents(): void {
+    const lightnessBtn = document.getElementById("lightnessBtn"); // error handler required
+
+    lightnessBtn.addEventListener("click", this.lightnessBtn, true);
+  }
+
+  private lightnessBtn = (): void => {
+    this.addComponent(componentsType.brightness);
+  }
+
+  private addComponent(type: componentsType): void {
+    switch (type) {
+      case componentsType.brightness:
+    }
   }
 }
 

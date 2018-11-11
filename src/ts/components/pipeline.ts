@@ -3,7 +3,11 @@ interface IPassParams {
   isChanged: boolean;
 }
 
-export default class Pipeline {
+const enum componentsType {
+  brightness,
+}
+
+class Pipeline {
   private pipeFlow: symbol[] = [];
   private pipeLut: object = {};
   private parentNode: HTMLElement;
@@ -42,3 +46,8 @@ export default class Pipeline {
     return outputData;
   }
 }
+
+export {
+  Pipeline,
+  componentsType,
+};
