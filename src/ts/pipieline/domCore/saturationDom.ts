@@ -9,7 +9,7 @@ export default class LightnessDom extends DomCore {
   private slider: Slider;
   private sliderDom: HTMLElement;
   private params: ISaturationParams = {
-    saturation: 0,
+    value: 0,
   };
 
   constructor() {
@@ -30,8 +30,8 @@ export default class LightnessDom extends DomCore {
     return this.sliderDom;
   }
 
-  private updateSaturationParams = (saturation) => {
-    this.params.saturation = saturation;
+  private updateSaturationParams = (value) => {
+    this.params.value = value;
 
     this.emitChangeEvent(this.sliderDom, this.params);
   }

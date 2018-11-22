@@ -1,3 +1,3 @@
 export default interface ISaturationParams {
-  saturation: number;
+  value: number;
 }

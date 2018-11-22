@@ -3,7 +3,7 @@ import DataCore from "../domCore/component/dataCore";
 import { ISaturationParams } from "./paramsInterface/paramsInterface";
 
 const defaultParams: ISaturationParams = {
-  saturation: 0,
+  value: 0,
 };
 
 export default class Pixelate extends DataCore {

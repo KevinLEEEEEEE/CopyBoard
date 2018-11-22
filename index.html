@@ -229,7 +229,9 @@
     <div class="outputPanel">
       <div class="outputPreview">
         <div class="previewBorder">
-          <canvas class="outputCanvas" id="outputCanvas"></canvas>
+          <div id="outputCanvasContainer">
+            <canvas class="outputCanvas pixelCanvas" id="outputCanvas"></canvas>
+          </div>
         </div>
         <div class="componentBtnContainer">
           <button class="lightnessBtn" id="lightnessBtn" name="lightness"></button>
@@ -242,11 +244,36 @@
       <div class="outputComponents">
         <div id="pipeline">
 
+          <!-- <pipe-brightness></pipe-brightness>
           <pipe-brightness></pipe-brightness>
-          <pipe-brightness></pipe-brightness>
-          <pipe-brightness></pipe-brightness>
+          <pipe-brightness></pipe-brightness> -->
 
         </div>
+        <div class="outputBtnContainer">
+          <button id="cancel" class="outputBtn">取消</button>
+          <a id="download" class="outputBtn">下载</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="initial">
+    <div class="initialPanel">
+      <h3>开始:</h3>
+
+      <div class="sizeSetting">
+        <div>
+          <span>宽度: </span>
+          <input type="text" placeholder="32" id="canvasWidth">
+        </div>
+        <div>
+          <span>高度: </span>
+          <input type="text" placeholder="32" id="canvasHeight">
+        </div>
+      </div>
+
+      <div class="initialBtnContainer">
+        <button id="initApp">></button>
       </div>
     </div>
   </div>

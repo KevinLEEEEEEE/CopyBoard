@@ -11,8 +11,8 @@ interface IComponentParams {
 }
 
 abstract class Component {
-  private componentDomsPackage: IComponentTemplate;
-  private domCore: DomCore;
+  // private componentDomsPackage: IComponentTemplate;
+  private domCore;
   private dataCore: DataCore;
   private parentNode: HTMLElement;
   private id: symbol;
@@ -30,24 +30,20 @@ abstract class Component {
     this.parentNode = parentNode;
 
     this.logger = new Logger();
-
-    this.componentDomsPackage = componentTemplate(name);
-
-    this.pipeEventEmitter = new PipeEventEmitter(this.componentDomsPackage.component, this.id);
   }
 
-  public init(dataCore: DataCore, domCore: DomCore): void {
+  public init(dataCore: DataCore, domCore): void {
     this.dataCore = dataCore;
 
     this.domCore = domCore;
 
-    this.attachBtnEvents();
+    this.pipeEventEmitter = new PipeEventEmitter(domCore, this.id);
+
+    this.appendSelfToParentNode();
 
     this.attachContentEvents();
 
-    this.appendContentToComponent();
-
-    this.appendSelfToParentNode();
+    this.attachBtnEvents();
   }
 
   public async run({ imageData, isChanged }: IComponentParams): Promise<IComponentParams> {
@@ -111,52 +107,36 @@ abstract class Component {
   }
 
   private appendSelfToParentNode(): void {
-    this.parentNode.appendChild(this.componentDomsPackage.component);
+    this.parentNode.appendChild(this.domCore);
   }
 
   private removeSelfFromParentNode(): void {
-    this.parentNode.removeChild(this.componentDomsPackage.component);
-  }
-
-  private appendContentToComponent(): void {
-    const contentContainer = this.domCore.getContentContainer();
-
-    this.componentDomsPackage.componentContent.appendChild(contentContainer);
-  }
-
-  private removeContentFromComponent(): void {
-    const contentContainer = this.domCore.getContentContainer();
-
-    this.domCore.delete();
-
-    this.componentDomsPackage.componentContent.removeChild(contentContainer);
+    this.parentNode.removeChild(this.domCore);
   }
 
   private attachBtnEvents(): void {
-    const { visibilityBtn, deleteBtn } = this.componentDomsPackage;
+    this.domCore.addEventListener("displayToggle", this.visibility, false);
 
-    visibilityBtn.addEventListener("click", this.visibility, true);
-
-    deleteBtn.addEventListener("click", this.delete, true);
+    this.domCore.addEventListener("deleted", this.delete, false);
   }
 
   private removeBtnEvents(): void {
-    const { visibilityBtn, deleteBtn } = this.componentDomsPackage;
+    this.domCore.removeEventListener("displayToggle", this.visibility, false);
 
-    visibilityBtn.removeEventListener("click", this.visibility, true);
-
-    deleteBtn.removeEventListener("click", this.delete, true);
+    this.domCore.removeEventListener("deleted", this.delete, false);
   }
 
-  private visibility = (): void => {
-    this.isVisible = !this.isVisible;
+  private visibility = (e): void => {
+    e.stopPropagation();
 
-    this.updateVisibilityBtnIcon();
+    this.isVisible = e.detail.isVisible;
 
     this.pipeEventEmitter.emitRunEvent();
   }
 
-  private delete = (): void => {
+  private delete = (e): void => {
+    e.stopPropagation();
+
     this.isDeleted = true;
 
     this.pipeEventEmitter.emitDeleteEvent();
@@ -165,31 +145,18 @@ abstract class Component {
 
     this.removeContentEvents();
 
-    this.removeContentFromComponent();
-
     this.removeSelfFromParentNode();
   }
 
-  private updateVisibilityBtnIcon() {
-    const { visibilityBtn } = this.componentDomsPackage;
-
-    visibilityBtn.classList.toggle("opacityBlack");
-    visibilityBtn.classList.toggle("opacityBlackZero");
-  }
-
   private attachContentEvents(): void {
-    const contentContainer = this.domCore.getContentContainer();
-
-    contentContainer.addEventListener("change", this.change, true);
+    this.domCore.addEventListener("changed", this.changed, false);
   }
 
   private removeContentEvents(): void {
-    const contentContainer = this.domCore.getContentContainer();
-
-    contentContainer.removeEventListener("change", this.change, true);
+    this.domCore.removeEventListener("changed", this.changed, false);
   }
 
-  private change = (e: CustomEvent): void => {
+  private changed = (e: CustomEvent): void => {
     e.stopPropagation();
 
     this.params = e.detail;

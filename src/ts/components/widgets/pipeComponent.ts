@@ -167,7 +167,7 @@ export default class PipeComponent extends EventElement {
   }
 
   private dispatchDeletedEvent(): void {
-    this.dispatchCustomEvent("delete", null);
+    this.dispatchCustomEvent("deleted", null);
   }
 
   // -----------------------------------------------------------------------------------------

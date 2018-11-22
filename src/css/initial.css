@@ -1,0 +1,60 @@
+.initial {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgb(20 , 20, 20);
+  z-index: 300;
+}
+
+.initialPanel {
+  width: 280px;
+  height: 150px;
+  padding: 15px 30px;
+  background-color: rgb(40, 40, 40);
+  border-radius: 20px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+  color: white;
+}
+
+.initialPanel h3 {
+  margin: 0 0 20px 5px;
+  font-size: 2rem;
+  opacity: .6;
+}
+
+.sizeSetting {
+  display: flex;
+  flex-direction: row;
+  font-size: .8rem;
+}
+
+.sizeSetting input {
+  width: 80px;
+  height: 30px;
+  margin: 0 20px 0 5px;
+  border-radius: 15px;
+  background-color: rgb(20, 20, 20);
+  text-align: center;
+}
+
+.initialBtnContainer {
+  display: flex;
+  flex-direction: row-reverse;
+  margin: 20px 0 0 0;
+}
+
+.initialBtnContainer button {
+  width: 30px;
+  height: 30px;
+  border-radius: 15px;
+  background-color: rgb(20, 20, 20);
+  border: transparent;
+  outline: none;
+  color: white;
+  font-size: .6rem;
+}

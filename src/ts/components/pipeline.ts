@@ -26,13 +26,13 @@ class Pipeline {
     };
   }
 
-  public init(): void {
+  // public init(): void {
 
-  }
+  // }
 
-  public delete(): void {
+  // public delete(): void {
 
-  }
+  // }
 
   private async runPipeline(passParams): Promise<ImageData> {
     const outputData = await this.pipeFlow.reduce((prev, current) => {

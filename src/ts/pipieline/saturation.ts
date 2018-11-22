@@ -8,7 +8,7 @@ export default class Lightness extends Component {
 
     const saturationData = new SaturationData();
 
-    const saturationDom = new SaturationDom();
+    const saturationDom = document.createElement("pipe-brightness");
 
     this.init(saturationData, saturationDom);
   }

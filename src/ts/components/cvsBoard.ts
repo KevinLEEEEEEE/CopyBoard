@@ -44,8 +44,9 @@ class CanvasBoard extends ShadowBoard implements IObserver {
   private state: STATE;
   private logger: Log;
 
-  constructor(name: string, parentNode: HTMLElement, colorDial: IColorDial, outputPanel: IOutputPanel) {
-    super(name, 40, 30, 10);
+  constructor(name: string, parentNode: HTMLElement, colorDial: IColorDial,
+              outputPanel: IOutputPanel, width: number, height: number) {
+    super(name, width, height, 10);
 
     this.colorDial = colorDial;
 
@@ -473,7 +474,7 @@ class CanvasBoard extends ShadowBoard implements IObserver {
   private setting = (): void => {
     const imageData = this.getImageData();
 
-    this.outputPanel.updateOutputImage(imageData);
+    this.outputPanel.updateOutputImage(imageData, this.getName());
   }
 
   private locker = (): void => {

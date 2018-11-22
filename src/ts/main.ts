@@ -1,9 +1,9 @@
 import { ColorDial } from "./components/colorDial";
 import CanvasBoard from "./components/cvsBoard";
+import FileInput from "./components/fileInput";
 import { OutputPanel } from "./components/outputPanel";
 import ReferenceBoard from "./components/refBoard";
 import { initCustomElements } from "./components/widgets/widgets";
-import FileInput from "./fileInput";
 
 export default class Main {
   private colorDial: ColorDial;
@@ -14,10 +14,7 @@ export default class Main {
   constructor() {
     const colorDialParentNode: HTMLElement = document.getElementById("colorDialEventsLayer");
     const fileInputDetectNode: HTMLElement = document.getElementById("main");
-    const canvasBoardParentNode: HTMLElement = document.getElementById("cvsBoardContainer");
     const pipelineParentNode: HTMLElement = document.getElementById("pipeline");
-
-    initCustomElements();
 
     this.colorDial = new ColorDial(colorDialParentNode);
 
@@ -25,10 +22,16 @@ export default class Main {
 
     this.outputPanel = new OutputPanel(pipelineParentNode);
 
-    this.canvasBoard = new CanvasBoard("canvas", canvasBoardParentNode, this.colorDial, this.outputPanel);
+    initCustomElements();
+
+    this.attachInitialPanel();
   }
 
-  public init() {
+  private initApp = (w: number, h: number) => {
+    const canvasBoardParentNode: HTMLElement = document.getElementById("cvsBoardContainer");
+
+    this.canvasBoard = new CanvasBoard("canvas", canvasBoardParentNode, this.colorDial, this.outputPanel, w, h);
+
     this.initComponents();
   }
 
@@ -55,5 +58,24 @@ export default class Main {
     const referenceBoard = new ReferenceBoard(name, parentNode, this.colorDial);
 
     referenceBoard.init(base64);
+  }
+
+  private attachInitialPanel(): void {
+    const initial = document.querySelector(".initial");
+    const initAppBtn = document.getElementById("initApp");
+    const widthInput = document.getElementById("canvasWidth") as HTMLInputElement;
+    const heightInput = document.getElementById("canvasHeight") as HTMLInputElement;
+
+    initAppBtn.addEventListener("click", () => {
+      this.initApp(this.getValidNumber(widthInput.value), this.getValidNumber(heightInput.value));
+
+      initial.classList.add("noDisplay");
+    }, false);
+  }
+
+  private getValidNumber(str: string): number {
+    const num = parseInt(str, 10);
+
+    return isNaN(num) === false ? num : 32;
   }
 }

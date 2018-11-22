@@ -1,4 +1,4 @@
-import Log from "./utils/log/log";
+import Log from "../utils/log/log";
 
 type IRegisterFunc = (base64: string, name: string) => void;
 

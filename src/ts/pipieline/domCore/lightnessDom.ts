@@ -6,33 +6,36 @@ const MIN_LIGHTNESS = -100;
 const MAX_LIGHTNESS = 100;
 
 export default class LightnessDom extends DomCore {
-  private slider: Slider;
-  private sliderDom: HTMLElement;
+  private slider;
   private params: ILightnessParams = {
-    lightness: 0,
+    value: 0,
   };
 
   constructor() {
     super();
 
-    this.slider = new Slider(MIN_LIGHTNESS, MAX_LIGHTNESS);
+    this.slider = document.createElement("pipe-brightness");
 
-    this.sliderDom = this.slider.getSliderDom();
+    // this.slider = new Slider(MIN_LIGHTNESS, MAX_LIGHTNESS);
 
-    this.slider.registerListener(this.updateLightnessParams);
+    // this.sliderDom = this.slider;
+
+    // this.slider.registerListener(this.updateLightnessParams);
   }
 
   public delete(): void {
-    this.slider.delete();
+    // this.slider.delete();
+
+    console.log("delete");
   }
 
   public getContentContainer(): HTMLElement {
-    return this.sliderDom;
+    return this.slider;
   }
 
-  private updateLightnessParams = (lightness) => {
-    this.params.lightness = lightness;
+  private updateLightnessParams = (value) => {
+    this.params.value = value;
 
-    this.emitChangeEvent(this.sliderDom, this.params);
+    this.emitChangeEvent(this.slider, this.params);
   }
 }

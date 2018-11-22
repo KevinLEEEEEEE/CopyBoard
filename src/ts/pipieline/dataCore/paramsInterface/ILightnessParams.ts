@@ -1,3 +1,3 @@
 export default interface ILightnessParams {
-  lightness: number;
+  value: number;
 }
