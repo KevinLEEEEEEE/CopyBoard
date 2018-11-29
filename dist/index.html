@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>pixel online</title>
+<link rel="shortcut icon" href="favicon.ico"></head>
+
+<body>
+  <div id="main"></div>
+
+  <div id="refBoardContainer" class="noPointerEvents initialPointerEventsForChildren"></div>
+
+  <div id="cvsBoardContainer" class="noPointerEvents initialPointerEventsForChildren"></div>
+
+  <div id="colorDialEventsLayer" class="noPointerEvents"></div>
+
+  <!-- <div class="board referenceBoard">
+      <div class="boardController">
+        <div class="controlPanel leftPanel">
+          <div>
+            <input type="text" placeholder="name" class="nameInput">
+          </div>
+          <div>
+            <button class="opacity"></button>
+            <input type="number" min="0" max="100" step="1" class="opacityInput">
+          </div>
+        </div>
+        <div class="controlPanel rightPanel">
+          <div>
+            <button class="moveUp"></button>
+            <button class="moveTop"></button>
+          </div>
+          <div>
+            <button class="moveDown"></button>
+            <button class="moveBottom"></button>
+          </div>
+          <div>
+            <button class="colorPicker"></button>
+            <button class="pixelate"></button>
+            <input type="number" min="0" class="pixelateInput">
+          </div>
+          <div>
+            <button class="lock unlock"></button>
+            <button class="delete"></button>
+          </div>
+        </div>
+      </div>
+      <div class="boardContent">
+        <canvas></canvas>
+      </div>
+    </div> -->
+
+  <!-- <div class="board canvasBoard">
+      <div class="boardController">
+        <div class="controlPanel leftPanel">
+          <div>
+            <input type="text" placeholder="name" class="nameInput">
+          </div>
+          <div>
+            <button class="opacity"></button>
+            <input type="number" min="0" max="100" step="1" class="opacityInput">
+          </div>
+        </div>
+        <div class="controlPanel rightPanel">
+          <div>
+            <button class="move"></button>
+          </div>
+          <div>
+            <button class="pen"></button>
+            <button class="eraser"></button>
+          </div>
+          <div>
+            <button class="colorPicker"></button>
+            <button class="bucket"></button>
+          </div>
+          <div>
+            <button class="lock unlock"></button>
+            <button class="setting"></button>
+          </div>
+        </div>
+      </div>
+      <div class="boardContent">
+        <canvas></canvas>
+        <canvas></canvas>
+      </div>
+    </div> -->
+
+  <!-- <div class="colorDial"> -->
+
+  <template id="simple-slider">
+    <style>
+      .slider {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        padding: 0 1rem;
+        background-color: rgb(245, 245, 245);
+      }
+
+      .slider p {
+        margin: 0;
+        padding: 0;
+        user-select: none;
+        font-size: .85rem;
+      }
+
+      .sliderBar {
+        display: flex;
+        align-items: center;
+        position: relative;
+        width: 100%;
+        height: 1.5rem;
+        margin: 0 .5rem;
+        overflow-x: hidden;
+        background-image: linear-gradient(rgb(50, 50, 50) 2px, transparent 0);
+        background-size: calc(100% - 2rem) 2px;
+        background-position: center center;
+        background-repeat: no-repeat;
+      }
+
+      .sliderBlock {
+        position: absolute;
+        left: calc(50% - 0.75rem);
+        top: 0;
+        width: 1.5rem;
+        height: 1.5rem;
+        padding: 0;
+        border: 1.5px rgb(50, 50, 50) solid;
+        border-radius: 0.75rem;
+        background-color: rgb(245, 245, 245);
+        box-shadow: 0 0 0 2px rgb(245, 245, 245);
+        box-sizing: border-box;
+        outline: none;
+      }
+    </style>
+
+    <div class="slider">
+      <p>
+        <slot name="min">min</slot>
+      </p>
+      <div class="sliderBar">
+        <button class="sliderBlock"></button>
+      </div>
+      <p>
+        <slot name="max">max</slot>
+      </p>
+    </div>
+  </template>
+
+  <template id="pipe-component">
+    <style>
+      .component {
+        width: 100%;
+        margin-bottom: 4rem;
+      }
+
+      .componentController {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+      }
+
+      .componentBtn {
+        width: 25px;
+        height: 25px;
+        padding: 0;
+        overflow: hidden;
+        background: none;
+        border: transparent;
+        outline: none;
+      }
+
+      .componentBtn img {
+        width: 100%;
+        height: 100%;
+      }
+
+      .componentName {
+        display: inline-block;
+        height: 25px;
+        overflow: hidden;
+        vertical-align: top;
+        line-height: 25px;
+      }
+
+      .componentContent {
+        margin-top: 1rem;
+      }
+
+      .noDisplay {
+        display: none;
+      }
+    </style>
+
+    <div class="component">
+      <div class="componentController">
+        <div>
+          <button class="componentBtn displayBtn">
+            <img src="assets/img/displayBlack-92552d.png" alt="display button">
+            <img src="assets/img/noDisplayBlack-536908.png" alt="no display button" class="noDisplay">
+          </button>
+          <span class="componentName">none</span>
+        </div>
+        <div>
+          <button class="componentBtn deleteBtn">
+            <img src="assets/img/deleteBlack-627aa6.png" alt="delete button">
+          </button>
+        </div>
+      </div>
+      <div class="componentContent">
+        <slot name="content"></slot>
+      </div>
+    </div>
+  </template>
+
+  <template id="pipe-brightness">
+    <pipe-component name="lightness">
+      <simple-slider slot="content" min="-100" max="100" value="10">
+        <span slot="min">-100</span>
+        <span slot="max">100</span>
+      </simple-slider>
+    </pipe-component>
+  </template>
+
+  <div class="output" id="output">
+    <div class="outputPanel">
+      <div class="outputPreview">
+        <div class="previewBorder">
+          <div id="outputCanvasContainer">
+            <canvas class="outputCanvas pixelCanvas" id="outputCanvas"></canvas>
+          </div>
+        </div>
+        <div class="componentBtnContainer">
+          <button class="lightnessBtn" id="lightnessBtn" name="lightness"></button>
+          <button class="contrastBtn" id="contrastBtn" name="contrast"></button>
+          <button class="saturationBtn" id="saturationBtn" name="saturation"></button>
+          <button class="curveBtn" id="curveBtn" name="curve"></button>
+          <button class="downloadBtn" id="downloadBtn" name="download"></button>
+        </div>
+      </div>
+      <div class="outputComponents">
+        <div id="pipeline">
+
+          <!-- <pipe-brightness></pipe-brightness>
+          <pipe-brightness></pipe-brightness>
+          <pipe-brightness></pipe-brightness> -->
+
+        </div>
+        <div class="outputBtnContainer">
+          <button id="cancel" class="outputBtn">取消</button>
+          <a id="download" class="outputBtn">下载</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="initial">
+    <div class="initialPanel">
+      <h3>开始:</h3>
+
+      <div class="sizeSetting">
+        <div>
+          <span>宽度: </span>
+          <input type="text" placeholder="32" id="canvasWidth">
+        </div>
+        <div>
+          <span>高度: </span>
+          <input type="text" placeholder="32" id="canvasHeight">
+        </div>
+      </div>
+
+      <div class="initialBtnContainer">
+        <button id="initApp">></button>
+      </div>
+    </div>
+  </div>
+<script type="text/javascript" src="assets/js/app.bundle.js?daff2b43d13e6bb5e137"></script></body>
+
+</html>
