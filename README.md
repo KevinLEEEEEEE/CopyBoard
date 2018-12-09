@@ -2,6 +2,10 @@
 
 一款像素画辅助软件，帮助用户从高清影像向像素风转绘
 
+![image](https://github.com/KevinLEEEEEEE/CopyBoard/blob/master/design/design.jpg)
+
+![image](https://github.com/KevinLEEEEEEE/CopyBoard/blob/master/design/output.jpg)
+
 ## 设计
 
 ### UI设计
