@@ -6,6 +6,13 @@
 
 ![image](https://github.com/KevinLEEEEEEE/CopyBoard/blob/master/design/output.jpg)
 
+## 如何使用
+
+1. 下载压缩包
+2. 打开 "./dist" 文件夹
+3. 打开 "index.html"
+4. 注意请用火狐浏览器打开，chrome有跨域访问限制，会影响webworker调用
+
 ## 设计
 
 ### UI设计
